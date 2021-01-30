@@ -1,0 +1,14 @@
+{
+    "domain": "https://b-ok.global",
+    "cookie": "",
+    "additionalBookLocation": "/home/root/Books/",
+    "defaultQuery": {
+        "exactMatch": "0",
+        "fromYear": "2020",
+        "toYear": "2021",
+        "language": "English",
+        "extension": "epub",
+        "order": "Most Popular",
+        "query": ""
+    }
+}
