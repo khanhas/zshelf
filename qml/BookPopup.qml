@@ -77,6 +77,9 @@ Item {
             height: parent.height - bookAuthor.y - bookAuthor.height - 110
             contentHeight: bookDesc.height
             clip: true
+            flickableDirection: Flickable.VerticalFlick
+            boundsBehavior: Flickable.StopAtBounds
+
             Text {
                 id: bookDesc
                 textFormat: Text.RichText

@@ -6,9 +6,12 @@ Rectangle {
     id: canvas
     width: 1404
     height: 1872
-    property int screenMargin: 40
-    property int bookWidth: (width - screenMargin * 2) / 4
-    property int itemContentWidth: bookWidth - 20
+    readonly property int screenMargin: 40
+    readonly property int columns: 4
+    readonly property int rows: 3
+    readonly property int itemPerPage: rows * columns
+    readonly property int bookWidth: (width - screenMargin * 2) / columns
+    readonly property int itemContentWidth: bookWidth - 20
 
     Rectangle {
         id: closeApp
@@ -35,35 +38,61 @@ Rectangle {
         }
     }
 
+
     Rectangle {
-        id: goUp
-        visible: libView.contentY > 0
-        anchors.bottom: parent.bottom
+        anchors.left: parent.left
         anchors.right: parent.right
-        anchors.margins: screenMargin
-        width: 80
-        height: 80
-        radius: 40
-        z: 1
-        color: "black"
-        Text {
-            text: "v"
-            font.family: "Maison Neue"
-            font.bold: true
-            font.pixelSize:40
+        anchors.top: parent.top
+        anchors.margins: 40
+        height: 100
+
+        Rectangle {
+            width: 250
+            height: 80
+
+            Image {
+                source: "png/searchblack"
+                width: 80
+                height: 80
+            }
+            Text {
+                text: "Search"
+                font.pixelSize: 30
+
+                font.family:"Maison Neue"
+                font.styleName: "Demi"
+                verticalAlignment: Text.AlignVCenter
+                height: parent.height
+                x: 100
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: queryUI.openSearch(true);
+            }
+        }
+        Rectangle {
+            width: accountStatusText.contentWidth + 60
+            height: 60
+            visible: store.accountStatus.length > 0
+            border.color: "black"
+            border.width: 3
+            radius: 30
             color: "white"
-            anchors.centerIn: parent
-            anchors.topMargin: 10
-            
-        }
-        transform: Rotation { 
-            origin.x: 40;
-            origin.y: 40; 
-            angle: 180
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: libView.positionViewAtBeginning()
+            anchors {
+                right: parent.right
+                rightMargin: 120
+                top: parent.top
+                topMargin: 10
+            }
+            Text {
+                id: accountStatusText
+                text: store.accountStatus
+                color: "black"
+                font.pixelSize: 25
+                font.family:"Maison Neue"
+                font.styleName: "Medium"
+                anchors.centerIn: parent
+            }
         }
     }
     
@@ -72,66 +101,16 @@ Rectangle {
         objectName: "libView"
         anchors.fill: parent
         anchors.margins: screenMargin
+        anchors.topMargin: 140
 
-        maximumFlickVelocity: 0
         boundsBehavior: Flickable.StopAtBounds
         cellWidth: bookWidth
-        cellHeight: bookWidth * 1.5 + 40
+        cellHeight: bookWidth * 1.5 + 30
         model: store.books
-
-        header: Rectangle {
-            width: libView.width
-            height: 100
-
-            Rectangle {
-                width: 250
-                height: 80
-
-                Image {
-                    source: "png/searchblack"
-                    width: 80
-                    height: 80
-                }
-                Text {
-                    text: "Search"
-                    font.pixelSize: 30
-
-                    font.family:"Maison Neue"
-                    font.styleName: "Demi"
-                    verticalAlignment: Text.AlignVCenter
-                    height: parent.height
-                    x: 100
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: queryUI.openSearch(true);
-                }
-            }
-            Rectangle {
-                width: accountStatusText.contentWidth + 60
-                height: 60
-                visible: store.accountStatus.length > 0
-                border.color: "black"
-                border.width: 3
-                radius: 30
-                color: "white"
-                anchors {
-                    right: parent.right
-                    rightMargin: 120
-                    top: parent.top
-                    topMargin: 10
-                }
-                Text {
-                    id: accountStatusText
-                    text: store.accountStatus
-                    color: "black"
-                    font.pixelSize: 25
-                    font.family:"Maison Neue"
-                    font.styleName: "Medium"
-                    anchors.centerIn: parent
-                }
-            }
-        }
+        flickableDirection: Flickable.HorizontalFlick
+        flow: GridView.TopToBottom
+        clip: true
+        snapMode: GridView.SnapToRow
 
         delegate: Item {
             id: root
@@ -227,6 +206,72 @@ Rectangle {
                 onPressAndHold: {
                     return;
                 }
+            }
+        }
+    }
+
+    
+    Rectangle {
+        property bool isClickable: (libView.currentIndex + itemPerPage) < libView.count
+        id: goRight
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: screenMargin
+        width: 80; height: 80; radius: 40
+        color: isClickable ? "black" : "gray"
+        Text {
+            text: "v"
+            font.family: "Maison Neue"
+            font.bold: true
+            font.pixelSize:40
+            color: "white"
+            anchors.centerIn: parent
+        }
+        transform: Rotation { 
+            origin.x: 40;
+            origin.y: 40; 
+            angle: 270
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (parent.isClickable) {
+                    libView.currentIndex += itemPerPage;
+                }
+                libView.positionViewAtIndex(libView.currentIndex, GridView.Beginning);
+            }
+        }
+    }
+
+    
+    Rectangle {
+        property bool isClickable: (libView.currentIndex - itemPerPage) >= 0
+        id: goLeft
+        anchors.bottom: parent.bottom
+        anchors.right: goRight.left
+        anchors.margins: screenMargin
+        width: 80; height: 80; radius: 40
+        color: isClickable ? "black" : "gray"
+        Text {
+            text: "v"
+            font.family: "Maison Neue"
+            font.bold: true
+            font.pixelSize:40
+            color: "white"
+            anchors.centerIn: parent
+        }
+        transform: Rotation { 
+            origin.x: 40;
+            origin.y: 40; 
+            angle: 90
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (parent.isClickable) {
+                    libView.currentIndex -= itemPerPage;
+                }
+                libView.positionViewAtIndex(libView.currentIndex, GridView.Beginning);
             }
         }
     }
