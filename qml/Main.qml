@@ -111,6 +111,9 @@ Rectangle {
         flow: GridView.TopToBottom
         clip: true
         snapMode: GridView.SnapToRow
+        // pixelAligned: true
+        flickDeceleration: 0
+        onMovementEnded: currentIndex = indexAt(contentX, 0)
 
         delegate: Item {
             id: root
@@ -237,6 +240,12 @@ Rectangle {
             onClicked: {
                 if (parent.isClickable) {
                     libView.currentIndex += itemPerPage;
+                } else {
+                    return;
+                }
+
+                if (libView.currentIndex >= libView.count) {
+                    libView.currentIndex = libView.count - itemPerPage + libView.count % itemPerPage;
                 }
                 libView.positionViewAtIndex(libView.currentIndex, GridView.Beginning);
             }
@@ -245,7 +254,8 @@ Rectangle {
 
     
     Rectangle {
-        property bool isClickable: (libView.currentIndex - itemPerPage) >= 0
+        property bool isClickable: (libView.currentIndex - itemPerPage) >= 0 ||
+            (libView.currentIndex - rows) >= 0
         id: goLeft
         anchors.bottom: parent.bottom
         anchors.right: goRight.left
@@ -270,6 +280,12 @@ Rectangle {
             onClicked: {
                 if (parent.isClickable) {
                     libView.currentIndex -= itemPerPage;
+                } else {
+                    return;
+                }
+
+                if (libView.currentIndex < 0) {
+                    libView.currentIndex = 0
                 }
                 libView.positionViewAtIndex(libView.currentIndex, GridView.Beginning);
             }

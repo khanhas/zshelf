@@ -109,7 +109,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    if(!model || model.status !== "Download") {
+                    if(!model || !model.dlUrl || model.status !== "Download") {
                         return
                     }
                     model.download();
