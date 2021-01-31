@@ -2,8 +2,8 @@
 [Z-Library](https://z-lib.org) browser and downloader for [reMarkable](https://remarkable.com/) devices
 
 <p align="center">
-  <img src="https://i.imgur.com/VJ5vYmA.png" width="300" title="Browse">
-  <img src="https://i.imgur.com/tDJqmvi.png" width="300" title="Book metadata">
+  <img src="https://i.imgur.com/O4IzQfG.png" width="300" title="Browse">
+  <img src="https://i.imgur.com/n9SnfxV.png" width="300" title="Book metadata">
   <img src="https://i.imgur.com/HsHWSEF.png" width="300" title="Search UI">
 </p>
 
@@ -24,8 +24,8 @@ opkg install rm2fb
 2. Run these command to download and unpack distributed package to `/home/root` location:
 ```bash
 cd /home/root
-wget "https://github.com/khanhas/zshelf/releases/download/v0.1.0/zshelf-reMarkable-0.1.0.zip"
-unzip "zshelf-reMarkable-0.1.0.zip"
+wget "https://github.com/khanhas/zshelf/releases/download/v0.1.1/zshelf-reMarkable-0.1.1.zip"
+unzip "zshelf-reMarkable-0.1.1.zip"
 ```
 
 ### [IMPORTANT] Configure domain and cookie
@@ -83,7 +83,7 @@ term=killall zshelf
 Save file and restart your launcher (`oxide` user: just hit "Load apps").
 
 ## Development
-0. [Set up reMarkable toolchain](https://remarkablewiki.com/devel/qt_creator#toolchain)
+0. [Set up reMarkable toolchain](https://remarkablewiki.com/devel/qt_creator#toolchain), NodeJS and `npm`
 1. `git clone https://github.com/khanhas/zshelf`
 2. `qmake`
 3. `make`
