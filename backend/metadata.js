@@ -1,12 +1,12 @@
 const cheerio = require("cheerio");
-const { fetchOptions } = require("./common");
+const { domain, fetchOptions } = require("./common");
 const fetch = require("node-fetch");
 
 if (process.argv.length < 3) {
     console.error("No link");
     return;
 }
-fetch(process.argv[2], fetchOptions).then(a => a.text()).then(html => {
+fetch(domain + process.argv[2], fetchOptions).then(a => a.text()).then(html => {
     const $ = cheerio.load(html, { _useHtmlParser2: true });
 
     const author = $(`[itemprop="author"]`)
@@ -30,17 +30,23 @@ fetch(process.argv[2], fetchOptions).then(a => a.text()).then(html => {
         description = detail;
     }
 
-    let downloadURL = $(".dlButton").attr("href");
-    if (downloadURL === "#") {
-        downloadURL = "";
+    let dlUrl = $(".dlButton").attr("href");
+    if (dlUrl === "#") {
+        dlUrl = "";
     }
+
+    const similars = $("#bMosaicBox .brick").get().map(a => ({
+        url: $(a).find("a").attr("href"),
+        img: $(a).find("img").attr("src"),
+    }));
 
     process.stdout.write(JSON.stringify({
         name: $("h1").text().trim(),
         author,
-        imgFile: $(".details-book-cover").attr("href"),
+        img: $(".details-book-cover").attr("href"),
         description,
-        downloadURL,
+        dlUrl,
+        similars,
     }));
 })
 .catch(err => {

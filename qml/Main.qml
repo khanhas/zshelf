@@ -156,11 +156,9 @@ Rectangle {
             Image {
                 id: image
                 fillMode: Image.PreserveAspectFit
-                height: name.y - 20
+                width: 200
                 source: model.modelData.imgFile
-                anchors.top: parent.top
-                anchors.topMargin: 10
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.centerIn: parent
             }
 
             Rectangle {
@@ -202,7 +200,7 @@ Rectangle {
                     author.color = "black"
                 }
                 onClicked: {
-                    model.modelData.getDetail();
+                    model.modelData.getDetail(itemInfo);
                     itemInfo.model = model.modelData;
                     itemInfo.popup.open();
                 }

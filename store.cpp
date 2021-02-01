@@ -97,7 +97,7 @@ void Store::newQuery(QString exactMatch, QString fromYear, QString toYear, QStri
                 continue;
 
             QJsonObject bookObj = book.toObject();
-            Book *item = new Book(this->rootView);
+            Book *item = new Book();
             item->setProperty("name", bookObj.value("name").toString());
             item->setProperty("author", bookObj.value("author").toString());
             item->setProperty("imgFile", bookObj.value("img").toString());
@@ -223,49 +223,63 @@ bool Store::setConfig(QString exactMatch, QString fromYear, QString toYear, QStr
     return true;
 }
 
-Book::Book(QObject *parent) : QObject(parent) {}
-
 Book::~Book() {
     if (worker != nullptr) {
         delete worker;
     }
 }
 
-void Book::getDetail()
+void Book::getDetail(QObject* popup)
 {
     if (_metadownloaded)
     {
         return;
     }
 
+    Worker *metaWorker = new Worker(nodePath, {QCoreApplication::applicationDirPath() + "/backend/metadata.js", _url}, true);
+    connect(metaWorker, &Worker::readAll, this, [this, metaWorker, popup](QByteArray bytes) {
+        QJsonParseError jsonError;
+        QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
+        if (jsonError.error != QJsonParseError::NoError)
+        {
+            qDebug() << "fromJson failed: " << jsonError.errorString();
+            setProperty("desc", bytes);
+            return;
+        }
+        if (!document.isObject())
+        {
+            return;
+        }
+        QJsonObject detail = document.object();
+        setProperty("name", detail.value("name").toString());
+        setProperty("author", detail.value("author").toString());
+        setProperty("dlUrl", detail.value("dlUrl").toString());
+        setProperty("desc", detail.value("description").toString());
+        setProperty("imgFile", detail.value("img").toString());
+
+        QJsonArray similarsArray = detail.value("similars").toArray();
+        QList<QObject *> recList;
+        for (auto recom : similarsArray)
+        {
+            QJsonObject bookObj = recom.toObject();
+            Book *item = new Book();
+            item->setProperty("imgFile", bookObj.value("img").toString());
+            item->setProperty("url", bookObj.value("url").toString());
+            recList.push_back(item);
+        }
+        setProperty("similars", QVariant::fromValue(recList));
+
+        setProperty("status", "Download");
+        _metadownloaded = true;
+        popup->setProperty("isBusy", false);
+
+        qDebug() << "Meta downloaded";
+        delete metaWorker;
+    });
+
     qDebug() << "Meta downloading";
-
-    QProcess proc;
-    proc.start(nodePath, QStringList{QCoreApplication::applicationDirPath() + "/backend/metadata.js", _url}, QIODevice::ReadOnly);
-    proc.waitForFinished();
-    QByteArray bytes = proc.readAll();
-    proc.close();
-
-    qDebug() << "Meta downloaded";
-
-    QJsonParseError jsonError;
-    QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
-    if (jsonError.error != QJsonParseError::NoError)
-    {
-        qDebug() << "fromJson failed: " << jsonError.errorString();
-        setProperty("desc", bytes);
-        return;
-    }
-    if (!document.isObject())
-    {
-        return;
-    }
-    QJsonObject detail = document.object();
-    setProperty("dlUrl", detail.value("downloadURL").toString());
-    setProperty("desc", detail.value("description").toString());
-    setProperty("imgFile", detail.value("imgFile").toString());
-    setProperty("status", "Download");
-    _metadownloaded = true;
+    popup->setProperty("isBusy", true);
+    metaWorker->start();
 }
 
 void Book::download()

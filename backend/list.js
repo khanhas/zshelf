@@ -52,7 +52,7 @@ fetch(listURL, fetchOptions).then(res => res.text()).then(html => {
         }
 
         return {
-            url: "https://b-ok.global" + $(ele).find('h3 a').attr('href'),
+            url: $(ele).find('h3 a').attr('href'),
             img: imageUrl,
             name: $(ele).find('h3').text().trim(),
             author: $(ele).find('div.authors').text().trim(),

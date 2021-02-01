@@ -19,7 +19,7 @@ class Book : public QObject
     Q_OBJECT
 
 public:
-    Book(QObject *parent);
+    Book(){};
     ~Book();
 
     Q_PROPERTY(QString imgFile MEMBER _imgFile NOTIFY imgFileChanged)
@@ -29,8 +29,9 @@ public:
     Q_PROPERTY(QString desc MEMBER _desc NOTIFY descChanged)
     Q_PROPERTY(QString dlUrl MEMBER _dlUrl NOTIFY dlUrlChanged)
     Q_PROPERTY(QString status MEMBER _status NOTIFY statusChanged)
+    Q_PROPERTY(QList<QObject *> similars MEMBER _similars NOTIFY similarsChanged)
 
-    Q_INVOKABLE void getDetail();
+    Q_INVOKABLE void getDetail(QObject *popup);
     Q_INVOKABLE void download();
 
     void updateProgress(int prog);
@@ -43,6 +44,7 @@ signals:
     void descChanged(QString);
     void dlUrlChanged(QString);
     void statusChanged(QString);
+    void similarsChanged(QList<QObject *>);
 
 private:
     Worker *worker = nullptr;
@@ -53,6 +55,7 @@ private:
     QString _desc;
     QString _dlUrl;
     QString _status;
+    QList<QObject *> _similars;
     bool _metadownloaded = false;
 };
 
