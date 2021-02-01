@@ -24,8 +24,8 @@ opkg install rm2fb
 2. Run these command to download and unpack distributed package to `/home/root` location:
 ```bash
 cd /home/root
-wget "https://github.com/khanhas/zshelf/releases/download/v0.1.1/zshelf-reMarkable-0.1.1.zip"
-unzip "zshelf-reMarkable-0.1.1.zip"
+wget "https://github.com/khanhas/zshelf/releases/download/v0.2.0/zshelf-reMarkable-0.2.0.zip"
+unzip "zshelf-reMarkable-0.2.0.zip"
 ```
 
 ### [IMPORTANT] Configure domain and cookie
