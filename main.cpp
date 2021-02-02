@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     view.setSource(QUrl(QStringLiteral("qrc:/Main.qml")));
 
     QObject::connect(view.engine(), &QQmlEngine::quit, &QGuiApplication::quit);
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, [&view]() { delete &view; });
 
     view.show();
     return app.exec();

@@ -1,5 +1,5 @@
 TEMPLATE = app
-QT += quick
+QT += quick network
 CONFIG += c++11
 LIBS += -lqsgepaper
 

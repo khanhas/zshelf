@@ -1,82 +1,10 @@
 #include "store.h"
 
 Worker *infoThread = nullptr;
-const QString nodePath("/opt/bin/node");
 
 Store::Store() : rootView(rootObject()), context(rootContext())
 {
-    worker = new Worker(nodePath, {}, true);
-
-    if (loadConfig())
-    {
-        newQuery(_exactMatch, _fromYear, _toYear, _language, _extension, _order, _query);
-    }
-    else
-    {
-        qDebug() << "config.json malformed";
-        newQuery("0", "2021", "2021", "English", "epub", "Most Popular", "");
-    }
-
-    if (_cookieAvailable) {
-        infoThread = new Worker(nodePath, {QCoreApplication::applicationDirPath() + "/backend/info.js"}, true);
-        connect(infoThread, &Worker::readAll, this, [this](QByteArray bytes) {
-            QJsonParseError jsonError;
-            QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
-            if (jsonError.error != QJsonParseError::NoError)
-            {
-                qDebug() << "fromJson failed: " << jsonError.errorString();
-                return;
-            }
-            if (!document.isObject())
-                return;
-
-            QJsonObject jsonObj = document.object();
-            QString downloads = jsonObj.value("today_download").toString("");
-            if (downloads.length() > 0)
-            {
-                auto counts = downloads.split("/");
-                downloads.prepend("Downloads: ");
-                if (counts[0] == counts[1])
-                {
-                    downloads.prepend("⚠️ ");
-                }
-                this->setProperty("accountStatus", downloads);
-            }
-        });
-        infoThread->start();
-    } else {
-        setProperty("accountStatus", "⚠️ Cookie is not configured");
-    }
-}
-
-Store::~Store()
-{
-    if (worker != nullptr)
-        delete worker;
-
-    if (infoThread != nullptr)
-        delete infoThread;
-}
-
-void Store::newQuery(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query)
-{
-    QStringList args = {
-        QCoreApplication::applicationDirPath() + "/backend/list.js",
-        exactMatch,
-        fromYear,
-        toYear,
-        language,
-        extension,
-        order,
-        query,
-    };
-
-    stopQuery();
-
-    setProperty("isBusy", true);
-
-    worker->args = args;
-
+    worker = new Worker({}, true);
     connect(worker, &Worker::readAll, this, [this](QByteArray bytes) {
         QJsonParseError jsonError;
         QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
@@ -108,13 +36,86 @@ void Store::newQuery(QString exactMatch, QString fromYear, QString toYear, QStri
 
         setProperty("isBusy", false);
 
-        for (auto oldBook : _books) {
+        for (auto oldBook : _books)
+        {
             delete oldBook;
         }
 
         setProperty("books", QVariant::fromValue(booksList));
     });
-    worker->start();
+
+    if (loadConfig())
+    {
+        newQuery(_exactMatch, _fromYear, _toYear, _language, _extension, _order, _query);
+    }
+    else
+    {
+        qDebug() << "config.json malformed";
+        newQuery("0", "2021", "2021", "English", "epub", "Most Popular", "");
+    }
+
+    if (_cookieAvailable) {
+        infoThread = new Worker({"INFO"}, true);
+        connect(infoThread, &Worker::readAll, this, [this](QByteArray bytes) {
+            QJsonParseError jsonError;
+            QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
+            if (jsonError.error != QJsonParseError::NoError)
+            {
+                qDebug() << "fromJson failed: " << jsonError.errorString();
+                qDebug() << "ERR: " << bytes;
+                return;
+            }
+            if (!document.isObject())
+                return;
+
+            QJsonObject jsonObj = document.object();
+            QString downloads = jsonObj.value("today_download").toString("");
+            if (downloads.length() > 0)
+            {
+                auto counts = downloads.split("/");
+                downloads.prepend("Downloads: ");
+                if (counts[0] == counts[1])
+                {
+                    downloads.prepend("⚠️ ");
+                }
+                this->setProperty("accountStatus", downloads);
+            }
+        });
+        infoThread->work();
+    } else {
+        setProperty("accountStatus", "⚠️ Cookie is not configured");
+    }
+}
+
+Store::~Store()
+{
+    if (worker != nullptr)
+        delete worker;
+
+    if (infoThread != nullptr)
+        delete infoThread;
+    
+    if (serverProc != nullptr)
+        delete serverProc;
+}
+
+void Store::newQuery(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query)
+{
+    QStringList args = {
+        "LIST",
+        exactMatch,
+        fromYear,
+        toYear,
+        language,
+        extension,
+        order,
+        query,
+    };
+
+    stopQuery();
+    setProperty("isBusy", true);
+    worker->args = args;
+    worker->work();
 }
 
 void Store::stopQuery()
@@ -236,7 +237,7 @@ void Book::getDetail(QObject* popup)
         return;
     }
 
-    Worker *metaWorker = new Worker(nodePath, {QCoreApplication::applicationDirPath() + "/backend/metadata.js", _url}, true);
+    Worker *metaWorker = new Worker({"META", _url}, true);
     connect(metaWorker, &Worker::readAll, this, [this, metaWorker, popup](QByteArray bytes) {
         QJsonParseError jsonError;
         QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
@@ -279,13 +280,13 @@ void Book::getDetail(QObject* popup)
 
     qDebug() << "Meta downloading";
     popup->setProperty("isBusy", true);
-    metaWorker->start();
+    metaWorker->work();
 }
 
 void Book::download()
 {
     if (worker == nullptr) {
-        worker = new Worker(nodePath, {QCoreApplication::applicationDirPath() + "/backend/download.js", _dlUrl});
+        worker = new Worker({"DOWN", _dlUrl});
 
         connect(worker, &Worker::updateProgress, this, &Book::updateProgress);
         connect(worker, &Worker::updateStatus, this, [this](QString stat) {
@@ -298,7 +299,7 @@ void Book::download()
         });
     }
     this->setProperty("status", QVariant("Downloading"));
-    worker->start();
+    worker->work();
 }
 
 void Book::updateProgress(int prog)
@@ -308,7 +309,7 @@ void Book::updateProgress(int prog)
         setProperty("status", QVariant("Downloaded"));
         if (infoThread != nullptr && !infoThread->isRunning())
         {
-            infoThread->start();
+            infoThread->work();
         }
         return;
     }

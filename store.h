@@ -5,14 +5,11 @@
 #include <QtQuick>
 #include <QQuickView>
 #include <QDebug>
-#include <QGuiApplication>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include "worker.h"
-#include <QProcess>
-
 
 class Book : public QObject
 {
