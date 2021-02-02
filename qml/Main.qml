@@ -1,17 +1,18 @@
-import QtQuick 2.5
+import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.0
 
 Rectangle {
     id: canvas
-    width: 1404
-    height: 1872
+    width: screenGeometry.width
+    height: screenGeometry.height
     readonly property int screenMargin: 40
     readonly property int columns: 4
     readonly property int rows: 3
     readonly property int itemPerPage: rows * columns
     readonly property int bookWidth: (width - screenMargin * 2) / columns
     readonly property int itemContentWidth: bookWidth - 20
+    Component.onCompleted: console.log()
 
     Rectangle {
         id: closeApp
@@ -92,6 +93,7 @@ Rectangle {
                 font.family:"Maison Neue"
                 font.styleName: "Medium"
                 anchors.centerIn: parent
+                anchors.verticalCenterOffset: 2
             }
         }
     }
@@ -133,8 +135,8 @@ Rectangle {
                 font.pixelSize:25
                 width: itemContentWidth
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: 10
-                anchors.horizontalCenter: image.horizontalCenter
+                anchors.bottomMargin: 60
+                anchors.horizontalCenter: parent.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
                 maximumLineCount: 1
                 wrapMode: Text.Wrap
@@ -146,34 +148,45 @@ Rectangle {
                 font.styleName: "Bold"
                 font.pixelSize:25
                 width: itemContentWidth
-                anchors.horizontalCenter: image.horizontalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
                 anchors.bottom: author.top
                 anchors.bottomMargin: 5
                 horizontalAlignment: Text.AlignHCenter
                 maximumLineCount: 2
                 wrapMode: Text.Wrap
             }
+            
             Image {
                 id: image
                 fillMode: Image.PreserveAspectFit
                 width: 200
-                source: model.modelData.imgFile
+                source: model.modelData.imgFile || "png/book"
                 anchors.centerIn: parent
+                anchors.verticalCenterOffset: -50
+                Image {
+                    visible: image.status === Image.Error
+                    source: "png/book"
+                    width: 52; height: 52
+                    anchors.centerIn: parent
+                }
             }
 
             Rectangle {
-                id: downloaded
-                visible: model.modelData.status === "Downloaded"
+                id: downloadStatus
+                visible: model.modelData.status === "Downloaded" ||
+                    model.modelData.status.endsWith("%")
                 anchors.top: parent.top
                 anchors.right: parent.right
-                width: 40
+                width: Math.max(40, downloadStatusText.contentWidth + 20)
                 height: 40
                 color: "black"
 
                 Text {
-                    text: "↓"
+                    id: downloadStatusText
+                    text: model.modelData.status === "Downloaded" ? "↓" : model.modelData.status
                     color: "white"
-                    anchors.fill: parent
+                    anchors.centerIn: parent
+                    anchors.verticalCenterOffset: 2
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     font.family:"Maison Neue"

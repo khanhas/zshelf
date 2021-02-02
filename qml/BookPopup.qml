@@ -152,9 +152,15 @@ Item {
                             Image {
                                 id: image
                                 fillMode: Image.PreserveAspectCrop
-                                source: model.modelData.imgFile
+                                source: model.modelData.imgFile || "png/book"
                                 anchors.fill: itemRoot
                                 anchors.margins: 10
+                                Image {
+                                    visible: image.status === Image.Error
+                                    source: "png/book"
+                                    width: 52; height: 52
+                                    anchors.centerIn: parent
+                                }
                             }
                             MouseArea {
                                 anchors.fill: itemRoot

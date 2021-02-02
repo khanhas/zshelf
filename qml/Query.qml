@@ -258,6 +258,7 @@ Item {
             color: "white"
             text: "Search"
             anchors.centerIn: parent
+            anchors.verticalCenterOffset: 2
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font.family:"Maison Neue"
@@ -289,6 +290,7 @@ Item {
             color: "black"
             text: "Set as default query"
             anchors.centerIn: parent
+            anchors.verticalCenterOffset: 2
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             font.family:"Maison Neue"

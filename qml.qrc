@@ -6,6 +6,7 @@
         <file alias="png/loading">qml/loading.png</file>
         <file alias="png/search">qml/search.png</file>
         <file alias="png/searchblack">qml/searchblack.png</file>
+        <file alias="png/book">qml/book.png</file>
         <file alias="fonts/MaisonNeue-Bold">fonts/MaisonNeue-Bold.ttf</file>
         <file alias="fonts/MaisonNeue-Demi">fonts/MaisonNeue-Demi.ttf</file>
         <file alias="fonts/MaisonNeue-Medium">fonts/MaisonNeue-Medium.ttf</file>
