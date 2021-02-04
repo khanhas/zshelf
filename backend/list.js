@@ -4,7 +4,7 @@ const { domain, fetchOptions } = require("./common");
 const fetch = require("node-fetch");
 
 module.exports = function (args, socket) {
-    let [isExact, fromYear, toYear, lang, ext, order, query] = args;
+    let [isExact, fromYear, toYear, lang, ext, order, query, page] = args;
 
     let listURL = [domain + "/s/?"];
     if (isExact && isExact === "1") listURL.push("e=1");
@@ -37,6 +37,8 @@ module.exports = function (args, socket) {
         return;
     }
 
+    if (page) listURL.push("page=" + page);
+
     listURL = listURL.join("&");
     fetch(listURL, fetchOptions).then(res => {
         const fileLength = parseInt(res.headers.get('content-length'));
@@ -65,6 +67,16 @@ module.exports = function (args, socket) {
 
     function sendResult(html) {
         const $ = cheerio.load(html, { _useHtmlParser2: true });
+
+        let totalItems = $(".totalCounter")
+        if (totalItems) {
+            totalItems = parseInt(totalItems.text().replace(/[()+]/g, "")); 
+            if (totalItems > 50) {
+                const totalPages = Math.ceil(totalItems / 50);
+                socket.write("TOTAL:" + totalPages.toString() + "\n");
+            }
+        }
+
         const books = $(".resItemBoxBooks").get().map(ele => {
             const image = $(ele).find('img');
             let imageUrl;

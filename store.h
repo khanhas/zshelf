@@ -70,6 +70,8 @@ public:
     Q_PROPERTY(QString order MEMBER _order)
     Q_PROPERTY(QString query MEMBER _query)
     Q_PROPERTY(QString accountStatus MEMBER _accountStatus NOTIFY accountStatusChanged)
+    Q_PROPERTY(int totalPages MEMBER _totalPages NOTIFY totalPagesChanged)
+    Q_PROPERTY(int currentPage MEMBER _currentPage NOTIFY currentPageChanged)
 
     Store();
     ~Store();
@@ -77,9 +79,9 @@ public:
     void open();
 
 public slots:
-    Q_INVOKABLE void newQuery(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query);
+    Q_INVOKABLE void newQuery(int page);
     Q_INVOKABLE void stopQuery();
-    Q_INVOKABLE bool setConfig(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query);
+    Q_INVOKABLE bool setConfig();
     Q_INVOKABLE void download(Book*);
 
 signals:
@@ -87,6 +89,8 @@ signals:
     void downloadListChanged();
     void isBusyChanged();
     void accountStatusChanged();
+    void totalPagesChanged();
+    void currentPageChanged();
 
 private:
     QQuickItem *rootView;
@@ -97,17 +101,18 @@ private:
     QObject *booksParent = nullptr;
     bool _isBusy;
     Worker *worker = nullptr;
-
-    QString _exactMatch;
-    QString _fromYear;
-    QString _toYear;
-    QString _language;
-    QString _extension;
-    QString _order;
-    QString _query;
+    QString _exactMatch = "0";
+    QString _fromYear = "2021";
+    QString _toYear = "2021";
+    QString _language = "English";
+    QString _extension = "epub";
+    QString _order = "Most Popular";
+    QString _query = "";
     QString _accountStatus;
 
     bool _cookieAvailable;
+    int _totalPages = 0;
+    int _currentPage = 0;
 };
 
 #endif /* STORE_H */

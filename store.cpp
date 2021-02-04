@@ -9,6 +9,17 @@ Store::Store() : rootView(rootObject()), context(rootContext())
     worker->checkServer();
     context->setContextProperty("storeProg", QVariant(0.2));
 
+    connect(worker, &Worker::updateStatus, this, [this](QString stat) {
+        qDebug() << "LOG: " << stat;
+        if (stat.startsWith("TOTAL:"))
+        {
+            // Hacky trick to force redrawing Repeater
+            _totalPages = 0;
+            emit totalPagesChanged();
+            _totalPages = stat.mid(6).trimmed().toInt();
+            emit totalPagesChanged();
+        }
+    });
     connect(worker, &Worker::updateProgress, this, [this](int prog) {
         context->setContextProperty("storeProg", QVariant(0.2 + prog / 100.0 * 0.7));
     });
@@ -85,15 +96,10 @@ Store::~Store()
 
 void Store::open()
 {
-    if (loadConfig())
-    {
-        newQuery(_exactMatch, _fromYear, _toYear, _language, _extension, _order, _query);
-    }
-    else
-    {
+    if (!loadConfig())
         qDebug() << "config.json malformed";
-        newQuery("0", "2021", "2021", "English", "epub", "Most Popular", "");
-    }
+
+    newQuery(0);
 
     if (_cookieAvailable)
     {
@@ -127,18 +133,22 @@ void Store::open()
             if (!historyList.isArray())
                 return;
             QJsonArray downloadedBooks = historyList.toArray();
-            for (auto book : downloadedBooks) {
+            for (auto book : downloadedBooks)
+            {
                 auto bookObj = book.toObject();
                 QString url = bookObj.value("url").toString();
 
                 bool found = false;
-                for (auto seen : _downloadList) {
-                    if (url == seen->property("url")) {
+                for (auto seen : _downloadList)
+                {
+                    if (url == seen->property("url"))
+                    {
                         found = true;
                         break;
                     }
                 }
-                if (found) continue;
+                if (found)
+                    continue;
                 Book *item = new Book(nullptr);
                 item->_url = url;
                 item->_name = bookObj.value("name").toString();
@@ -154,17 +164,19 @@ void Store::open()
     }
 }
 
-void Store::newQuery(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query)
+void Store::newQuery(int page = 0)
 {
+    _currentPage = page;
     QStringList args = {
         "LIST",
-        exactMatch,
-        fromYear,
-        toYear,
-        language,
-        extension,
-        order,
-        query,
+        _exactMatch,
+        _fromYear,
+        _toYear,
+        _language,
+        _extension,
+        _order,
+        _query,
+        QString::number(page + 1)
     };
 
     stopQuery();
@@ -222,7 +234,7 @@ bool Store::loadConfig()
     return true;
 }
 
-bool Store::setConfig(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query)
+bool Store::setConfig()
 {
     QFile file(QCoreApplication::applicationDirPath() + "/config.json");
 
@@ -252,13 +264,13 @@ bool Store::setConfig(QString exactMatch, QString fromYear, QString toYear, QStr
 
     QJsonObject defaultQuery;
 
-    defaultQuery.insert("exactMatch", exactMatch);
-    defaultQuery.insert("fromYear", fromYear);
-    defaultQuery.insert("toYear", toYear);
-    defaultQuery.insert("language", language);
-    defaultQuery.insert("extension", extension);
-    defaultQuery.insert("order", order);
-    defaultQuery.insert("query", query);
+    defaultQuery.insert("exactMatch", _exactMatch);
+    defaultQuery.insert("fromYear", _fromYear);
+    defaultQuery.insert("toYear", _toYear);
+    defaultQuery.insert("language", _language);
+    defaultQuery.insert("extension", _extension);
+    defaultQuery.insert("order", _order);
+    defaultQuery.insert("query", _query);
 
     jsonObj.remove("defaultQuery");
     jsonObj.insert("defaultQuery", defaultQuery);

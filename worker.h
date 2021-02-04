@@ -63,6 +63,11 @@ public:
                 emit updateProgress(line.mid(5).trimmed().toInt());
                 continue;
             }
+            else if (line.startsWith("TOTAL:"))
+            {
+                emit updateStatus(line);
+                continue;
+            }
 
             if (isReadAll)
                 bytes.push_back(line);

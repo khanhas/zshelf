@@ -241,7 +241,46 @@ Rectangle {
         }
     }
 
-    
+    Row {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.leftMargin: screenMargin
+        anchors.bottomMargin: screenMargin + 10
+        Repeater {
+            model: store.totalPages
+            Rectangle {
+                width: 100; height: 60
+                Rectangle {
+                    id: bg
+                    width: 80; height: 60
+                    border.width: store.currentPage == index ? 2 : 0
+                    border.color: "black"
+                    radius: 30
+                    color: "white"
+                }
+                Text {
+                    text: (index + 1) * 50
+                    anchors.centerIn: bg
+                    anchors.verticalCenterOffset: 2
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.family: "Maison Neue"
+                    font.styleName: "Medium"
+                    font.pixelSize: 20
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        if (store.currentPage == index) {
+                            return;
+                        }
+                        store.newQuery(index);
+                    }
+                }
+            }
+        }
+    }
+
     Rectangle {
         property bool isClickable: (libView.currentIndex + itemPerPage) < libView.count
         id: goRight
@@ -351,17 +390,27 @@ Rectangle {
     Rectangle {
         z: 4
         visible: store.isBusy
-        color: "black"
-        width: 344; height: 2
+        color: "white"
+        width: 400; height: 200
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: 80
+        anchors.verticalCenterOffset: 160
+
+        Rectangle {
+            id: progBarBase
+            color: "black";
+            width: 344
+            height: 2
+            anchors.top: parent.top
+            anchors.topMargin: 60
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
 
         Rectangle {
             color: "black";
             width: storeProg * 344
             height: 15
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
+            anchors.bottom: progBarBase.bottom
+            anchors.left: progBarBase.left
         }
 
         onVisibleChanged: {
@@ -378,8 +427,8 @@ Rectangle {
             height: 70
             radius: 3
             anchors {
-                top: parent.bottom
-                topMargin: 40
+                bottom: parent.bottom
+                bottomMargin: 30
                 horizontalCenter: parent.horizontalCenter
             }
             Text {

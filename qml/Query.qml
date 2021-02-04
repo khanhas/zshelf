@@ -32,16 +32,19 @@ Item {
         }
     }
 
+    function getParams() {
+        storeFront.exactMatch = exactMatch.position;
+        storeFront.fromYear = fromYear.value();
+        storeFront.toYear = toYear.value();
+        storeFront.language = language.value();
+        storeFront.extension = extension.value();
+        storeFront.order = order.value();
+        storeFront.query = textInput.text;
+    }
+
     function sendQuery() {
-        storeFront.newQuery(
-            exactMatch.position,
-            fromYear.value(),
-            toYear.value(),
-            language.value(),
-            extension.value(),
-            order.value(),
-            textInput.text
-        );
+        getParams();
+        storeFront.newQuery(0);
     }
 
     Rectangle {
@@ -208,15 +211,8 @@ Item {
             leftMargin: 40
         }
         onTapped: {
-            storeFront.setConfig(
-                exactMatch.position,
-                fromYear.value(),
-                toYear.value(),
-                language.value(),
-                extension.value(),
-                order.value(),
-                textInput.text
-            );
+            getParams();
+            storeFront.setConfig();
 
             setDefaultQuery.text = "✔";
             resetButtonText.start();
