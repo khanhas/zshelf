@@ -33,7 +33,7 @@ module.exports = function (args, socket) {
         }
 
         if (!fileName || !fileExt) {
-            socket.write("ERR: No file\n");
+            socket.write("ERR: 2 No file\n");
             return;
         }
 
@@ -51,7 +51,7 @@ module.exports = function (args, socket) {
         });
 
         response.body.on("error", (error) => {
-            socket.write("ERR: " + error + "\n");
+            socket.write("ERR: 2 " + error + "\n");
             socket.end();
         });
 
@@ -88,7 +88,7 @@ module.exports = function (args, socket) {
         });
     })
         .catch(err => {
-            socket.write("ERR: " + err + "\n");
+            socket.write("ERR: 1 " + err + "\n");
             socket.end();
         });
 }

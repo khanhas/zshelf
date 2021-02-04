@@ -54,7 +54,7 @@ module.exports = function (args, socket) {
         socket.end();
     })
         .catch(err => {
-            socket.write("ERR: " + err + "\n");
+            socket.write("ERR: 1 " + err + "\n");
             socket.end();
         });
 }

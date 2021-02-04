@@ -3,7 +3,7 @@ const cheerio = require("cheerio");
 const { domain, fetchOptions } = require("./common");
 const fetch = require("node-fetch");
 
-module.exports = async function (args, socket) {
+module.exports = function (args, socket) {
     let [isExact, fromYear, toYear, lang, ext, order, query] = args;
 
     let listURL = [domain + "/s/?"];
@@ -38,22 +38,30 @@ module.exports = async function (args, socket) {
     }
 
     listURL = listURL.join("&");
-    const res = await fetch(listURL, fetchOptions);
-    const fileLength = parseInt(res.headers.get('content-length'));
+    fetch(listURL, fetchOptions).then(res => {
+        const fileLength = parseInt(res.headers.get('content-length'));
 
-    let raw = "";
+        let raw = "";
 
-    res.body.on("data", (chunk) => {
-        raw += chunk;
-        socket.write("PROG:" + Math.round(res.body.bytesWritten / fileLength * 100).toString() + "\n");
-    });
+        res.body.on("data", (chunk) => {
+            raw += chunk;
+            socket.write("PROG:" + Math.round(res.body.bytesWritten / fileLength * 100).toString() + "\n");
+        });
 
-    res.body.on('end', () => {
-        socket.write("PROG:100\n");
-        sendResult(raw);
-    });
+        res.body.on('end', () => {
+            socket.write("PROG:100\n");
+            sendResult(raw);
+        });
 
-    res.body.on("error", (err) => { throw err });
+        res.body.on("error", (err) => {
+            socket.write("ERR: 2 " + err + "\n");
+            socket.end();
+        });
+    })
+        .catch(err => {
+            socket.write("ERR: 1 " + err +  "\n");
+            socket.end();
+        });
 
     function sendResult(html) {
         const $ = cheerio.load(html, { _useHtmlParser2: true });

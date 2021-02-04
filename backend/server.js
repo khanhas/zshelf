@@ -20,7 +20,7 @@ server.listen(socketLocation, () => {
 });
 
 server.on("connection", (client) => {
-    console.log('got connection!');
+    console.log('[SERVER] New client');
     client.on("data", (data) => {
         try {
             console.log(data.toString());
@@ -34,7 +34,7 @@ server.on("connection", (client) => {
                 case "DOWN": download(arg, client); break;
             }
         } catch (err) {
-            client.write("ERR: " + err + "\n");
+            client.write("ERR: 0 " + err + "\n");
             client.end();
         }
     });
