@@ -14,10 +14,8 @@ server.listen(socketLocation, () => {
 
     setInterval(() => {
         // Exit when zshelf dies
-        const zshelfPid = execSync("pidof zshelf");
-        if (zshelfPid.length === 0) {
-            process.exit(0);
-        }
+        try { execSync("pidof zshelf"); }
+        catch { process.exit(0); }
     }, 10000);
 });
 
@@ -36,7 +34,8 @@ server.on("connection", (client) => {
                 case "DOWN": download(arg, client); break;
             }
         } catch (err) {
-            client.write("ERR: " + err + "\n", client.end);
+            client.write("ERR: " + err + "\n");
+            client.end();
         }
     });
 });

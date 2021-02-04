@@ -3,7 +3,7 @@ const cheerio = require("cheerio");
 const { domain, fetchOptions } = require("./common");
 const fetch = require("node-fetch");
 
-module.exports = function (args, socket) {
+module.exports = async function (args, socket) {
     let [isExact, fromYear, toYear, lang, ext, order, query] = args;
 
     let listURL = [domain + "/s/?"];
@@ -32,13 +32,30 @@ module.exports = function (args, socket) {
     if (query) listURL.push("q=" + encodeURI(query));
 
     if (listURL.length < 2) {
-        console.error("Not enough parameter");
+        // socket.write("[]");
+        socket.write("ERR: Not enough query parameter\n");
         return;
     }
 
     listURL = listURL.join("&");
+    const res = await fetch(listURL, fetchOptions);
+    const fileLength = parseInt(res.headers.get('content-length'));
 
-    fetch(listURL, fetchOptions).then(res => res.text()).then(html => {
+    let raw = "";
+
+    res.body.on("data", (chunk) => {
+        raw += chunk;
+        socket.write("PROG:" + Math.round(res.body.bytesWritten / fileLength * 100).toString() + "\n");
+    });
+
+    res.body.on('end', () => {
+        socket.write("PROG:100\n");
+        sendResult(raw);
+    });
+
+    res.body.on("error", (err) => { throw err });
+
+    function sendResult(html) {
         const $ = cheerio.load(html, { _useHtmlParser2: true });
         const books = $(".resItemBoxBooks").get().map(ele => {
             const image = $(ele).find('img');
@@ -51,7 +68,7 @@ module.exports = function (args, socket) {
             } else {
                 imageUrl = image.attr('data-src');
             }
-            if (imageUrl[0] === ("/")) imageUrl = "";
+            if (imageUrl && imageUrl[0] === "/") imageUrl = "";
 
             return {
                 url: $(ele).find('h3 a').attr('href'),
@@ -61,8 +78,7 @@ module.exports = function (args, socket) {
             }
         });
         socket.write(JSON.stringify(books));
-    })
-        .catch((err) => {
-            socket.write("ERR: " + err + "\n");
-        });
+        socket.write("\n");
+        socket.end();
+    }
 }

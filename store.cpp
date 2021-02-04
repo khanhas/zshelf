@@ -5,45 +5,86 @@ Worker *infoThread = nullptr;
 Store::Store() : rootView(rootObject()), context(rootContext())
 {
     worker = new Worker({}, true);
+    // Start server
+    worker->checkServer();
+    context->setContextProperty("storeProg", QVariant(0.2));
+
+    connect(worker, &Worker::updateProgress, this, [this](int prog) {
+        context->setContextProperty("storeProg", QVariant(0.2 + prog / 100.0 * 0.7));
+    });
+    connect(worker, &Worker::socketClosed, this, [this]() {
+        context->setContextProperty("titleVisible", QVariant(false));
+        setProperty("isBusy", false);
+    });
     connect(worker, &Worker::readAll, this, [this](QByteArray bytes) {
+        if (booksParent != nullptr) {
+            delete booksParent;
+        }
+
+        _books.clear();
+        emit booksChanged();
+
+        context->setContextProperty("storeProg", QVariant(0.95));
         QJsonParseError jsonError;
         QJsonDocument document = QJsonDocument::fromJson(bytes, &jsonError);
         if (jsonError.error != QJsonParseError::NoError)
         {
             qDebug() << "fromJson failed: " << jsonError.errorString();
+            context->setContextProperty("storeError", bytes);
             return;
         }
 
         if (!document.isArray())
+        {
+            context->setContextProperty("storeError", QVariant("ERR: Server response malformed"));
             return;
+        }
 
-        QList<QObject *> booksList;
+        // QList<QObject *> booksList;
         QJsonArray list = document.array();
+        if (list.size() == 0)
+        {
+            context->setContextProperty("storeError", QVariant("No result found"));
+            return;
+        }
+
+        booksParent = new QObject();
+
         for (auto book : list)
         {
             if (!book.isObject())
                 continue;
 
             QJsonObject bookObj = book.toObject();
-            Book *item = new Book();
-            item->setProperty("name", bookObj.value("name").toString());
-            item->setProperty("author", bookObj.value("author").toString());
-            item->setProperty("imgFile", bookObj.value("img").toString());
-            item->setProperty("url", bookObj.value("url").toString());
+            Book *item = new Book(booksParent);
+            item->_name = bookObj.value("name").toString();
+            item->_author = bookObj.value("author").toString();
+            item->_imgFile = bookObj.value("img").toString();
+            item->_url = bookObj.value("url").toString();
 
-            booksList.push_back(item);
+            _books.push_back(item);
         }
 
-        setProperty("isBusy", false);
-
-        for (auto oldBook : _books)
-        {
-            delete oldBook;
-        }
-
-        setProperty("books", QVariant::fromValue(booksList));
+        emit booksChanged();
+        context->setContextProperty("storeProg", QVariant(1));
+        context->setContextProperty("storeError", QVariant(""));
     });
+}
 
+Store::~Store()
+{
+    if (worker != nullptr)
+        delete worker;
+
+    if (infoThread != nullptr)
+        delete infoThread;
+    
+    if (serverProc != nullptr)
+        delete serverProc;
+}
+
+void Store::open()
+{
     if (loadConfig())
     {
         newQuery(_exactMatch, _fromYear, _toYear, _language, _extension, _order, _query);
@@ -54,7 +95,8 @@ Store::Store() : rootView(rootObject()), context(rootContext())
         newQuery("0", "2021", "2021", "English", "epub", "Most Popular", "");
     }
 
-    if (_cookieAvailable) {
+    if (_cookieAvailable)
+    {
         infoThread = new Worker({"INFO"}, true);
         connect(infoThread, &Worker::readAll, this, [this](QByteArray bytes) {
             QJsonParseError jsonError;
@@ -80,23 +122,36 @@ Store::Store() : rootView(rootObject()), context(rootContext())
                 }
                 this->setProperty("accountStatus", downloads);
             }
+
+            QJsonValue historyList = jsonObj.value("today_list");
+            if (!historyList.isArray())
+                return;
+            QJsonArray downloadedBooks = historyList.toArray();
+            for (auto book : downloadedBooks) {
+                auto bookObj = book.toObject();
+                QString url = bookObj.value("url").toString();
+
+                bool found = false;
+                for (auto seen : _downloadList) {
+                    if (url == seen->property("url")) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) continue;
+                Book *item = new Book(nullptr);
+                item->_url = url;
+                item->_name = bookObj.value("name").toString();
+                _downloadList.push_back(item);
+            }
+            emit downloadListChanged();
         });
         infoThread->work();
-    } else {
+    }
+    else
+    {
         setProperty("accountStatus", "⚠️ Cookie is not configured");
     }
-}
-
-Store::~Store()
-{
-    if (worker != nullptr)
-        delete worker;
-
-    if (infoThread != nullptr)
-        delete infoThread;
-    
-    if (serverProc != nullptr)
-        delete serverProc;
 }
 
 void Store::newQuery(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query)
@@ -115,6 +170,7 @@ void Store::newQuery(QString exactMatch, QString fromYear, QString toYear, QStri
     stopQuery();
     setProperty("isBusy", true);
     worker->args = args;
+    context->setContextProperty("storeProg", QVariant(0.2));
     worker->work();
 }
 
@@ -224,6 +280,29 @@ bool Store::setConfig(QString exactMatch, QString fromYear, QString toYear, QStr
     return true;
 }
 
+void Store::download(Book* book)
+{
+    book->worker = new Worker({"DOWN", book->_dlUrl});
+    connect(book->worker, &Worker::updateProgress, book, &Book::updateProgress);
+    connect(book->worker, &Worker::updateStatus, book, [book](QString stat) {
+        qDebug() << "LOG: " << stat;
+        if (stat.startsWith("ERR:"))
+        {
+            book->setProperty("status", QVariant(stat.trimmed()));
+            book->worker->terminate();
+            delete book->worker;
+        }
+    });
+    connect(book->worker, &Worker::socketClosed, book, [book]() { delete book->worker; });
+
+    book->setParent(nullptr);
+    _downloadList.prepend(book);
+    emit downloadListChanged();
+
+    book->setProperty("status", QVariant("Downloading"));
+    book->worker->work();
+}
+
 Book::~Book() {
     if (worker != nullptr) {
         delete worker;
@@ -263,7 +342,7 @@ void Book::getDetail(QObject* popup)
         for (auto recom : similarsArray)
         {
             QJsonObject bookObj = recom.toObject();
-            Book *item = new Book();
+            Book *item = new Book(this);
             item->setProperty("imgFile", bookObj.value("img").toString());
             item->setProperty("url", bookObj.value("url").toString());
             recList.push_back(item);
@@ -281,25 +360,6 @@ void Book::getDetail(QObject* popup)
     qDebug() << "Meta downloading";
     popup->setProperty("isBusy", true);
     metaWorker->work();
-}
-
-void Book::download()
-{
-    if (worker == nullptr) {
-        worker = new Worker({"DOWN", _dlUrl});
-
-        connect(worker, &Worker::updateProgress, this, &Book::updateProgress);
-        connect(worker, &Worker::updateStatus, this, [this](QString stat) {
-            qDebug() << "LOG: " << stat;
-            if (stat.startsWith("ERR:"))
-            {
-                this->setProperty("status", QVariant(stat.trimmed()));
-                this->worker->terminate();
-            }
-        });
-    }
-    this->setProperty("status", QVariant("Downloading"));
-    worker->work();
 }
 
 void Book::updateProgress(int prog)

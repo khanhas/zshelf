@@ -16,7 +16,7 @@ class Book : public QObject
     Q_OBJECT
 
 public:
-    Book(){};
+    Book(QObject* parent) : QObject(parent) {};
     ~Book();
 
     Q_PROPERTY(QString imgFile MEMBER _imgFile NOTIFY imgFileChanged)
@@ -29,7 +29,6 @@ public:
     Q_PROPERTY(QList<QObject *> similars MEMBER _similars NOTIFY similarsChanged)
 
     Q_INVOKABLE void getDetail(QObject *popup);
-    Q_INVOKABLE void download();
 
     void updateProgress(int prog);
 
@@ -43,7 +42,7 @@ signals:
     void statusChanged(QString);
     void similarsChanged(QList<QObject *>);
 
-private:
+public:
     Worker *worker = nullptr;
     QString _imgFile;
     QString _name;
@@ -61,6 +60,7 @@ class Store : public QQuickView
     Q_OBJECT
 public:
     Q_PROPERTY(QList<QObject *> books MEMBER _books NOTIFY booksChanged)
+    Q_PROPERTY(QList<QObject *> downloadList MEMBER _downloadList NOTIFY downloadListChanged)
     Q_PROPERTY(bool isBusy MEMBER _isBusy NOTIFY isBusyChanged)
     Q_PROPERTY(QString exactMatch MEMBER _exactMatch)
     Q_PROPERTY(QString fromYear MEMBER _fromYear)
@@ -74,24 +74,29 @@ public:
     Store();
     ~Store();
     bool loadConfig();
+    void open();
 
 public slots:
     Q_INVOKABLE void newQuery(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query);
     Q_INVOKABLE void stopQuery();
     Q_INVOKABLE bool setConfig(QString exactMatch, QString fromYear, QString toYear, QString language, QString extension, QString order, QString query);
+    Q_INVOKABLE void download(Book*);
 
 signals:
-    void booksChanged(QList<QObject *>);
-    void isBusyChanged(bool);
-    void accountStatusChanged(QString);
+    void booksChanged();
+    void downloadListChanged();
+    void isBusyChanged();
+    void accountStatusChanged();
 
 private:
     QQuickItem *rootView;
     QQmlContext *context;
     QQuickItem *storeView;
     QList<QObject *> _books;
+    QList<QObject *> _downloadList;
+    QObject *booksParent = nullptr;
     bool _isBusy;
-    Worker *worker;
+    Worker *worker = nullptr;
 
     QString _exactMatch;
     QString _fromYear;

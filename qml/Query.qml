@@ -6,6 +6,7 @@ import "modes"
 
 Item {
     property variant storeFront;
+    property bool firstOpen: true;
 
     id: searchUI
     visible: false
@@ -14,6 +15,18 @@ Item {
         if (open) {
             searchUI.visible = true
             keyboard.dispatcher.setFocusObject(textInput);
+            if (firstOpen) {
+                firstOpen = false;
+                fromYear.setDefault(storeFront.fromYear);
+                toYear.setDefault(storeFront.toYear);
+                fromYear.activated(fromYear.curIndex);
+
+                language.setDefault(storeFront.language);
+                extension.setDefault(storeFront.extension);
+                order.setDefault(storeFront.order);
+                storeFront.exactMatch == "1" && exactMatch.toggle();
+                storeFront.query.length && (textInput.text = storeFront.query);
+            }
         } else {
             searchUI.visible = false;
         }
@@ -22,11 +35,11 @@ Item {
     function sendQuery() {
         storeFront.newQuery(
             exactMatch.position,
-            fromYear.currentText,
-            toYear.currentText,
-            language.currentText,
-            extension.currentText,
-            order.currentText,
+            fromYear.value(),
+            toYear.value(),
+            language.value(),
+            extension.value(),
+            order.value(),
             textInput.text
         );
     }
@@ -104,8 +117,7 @@ Item {
         }
     }
 
-    
-    ComboBox {
+    Filter {
         id: fromYear
         model: {
             let a = ["Any"];
@@ -116,209 +128,128 @@ Item {
             }
             return a;
         }
-        anchors {
-            left: parent.left
-            top: searchBox.bottom
-            topMargin: 90
-            leftMargin: 40
-        }
-        width: 200
-        height: 60
-        Text {
-            text: "From"
-            font.pixelSize: 35
-            font.family: "Maison Neue"
-            font.styleName: "Medium"
-            anchors {
-                bottom: parent.top
-                bottomMargin: 10
+        anchors.left: parent.left
+        width: 150
+        text: "From"
+        onActivated: {
+            let oldIndex = toYear.curIndex;
+            toYear.model = index > 0 ? fromYear.model.slice(0, index + 1) : fromYear.model;
+            if (oldIndex <= index) {
+                toYear.curIndex = oldIndex;
+            } else {
+                toYear.curIndex = index;
             }
         }
-        Component.onCompleted: currentIndex = find(storeFront.fromYear, Qt.MatchExactly)
     }
-    ComboBox {
+
+    Filter {
         id: toYear
         model: fromYear.model
-        anchors {
-            left: fromYear.right
-            top: searchBox.bottom
-            topMargin: 90
-            leftMargin: 30
-        }
-        width: 200
-        height: 60
-        Text {
-            text: "To"
-            font.pixelSize: 35
-            font.family: "Maison Neue"
-            font.styleName: "Medium"
-            anchors {
-                bottom: parent.top
-                bottomMargin: 10
-            }
-        }
-        Component.onCompleted: currentIndex = find(storeFront.toYear, Qt.MatchExactly)
+        text: "To"
+        anchors.left: fromYear.right
+        width: 150
     }
-    ComboBox {
+
+    Filter {
         id: language
-        anchors {
-            left: toYear.right
-            top: searchBox.bottom
-            topMargin: 90
-            leftMargin: 30
-        }
-        width: 300
-        height: 60
         model: ["Any","Afrikaans","Albanian","Arabic","Armenian","Azerbaijani","Bashkir","Belarusian","Bengali","Berber","Bulgarian","Catalan","Chinese","Crimean Tatar","Croatian","Czech","Danish","Dutch","English","Esperanto","Finnish","French","Georgian","German","Greek","Gujarati","Hebrew","Hindi","Hungarian","Icelandic","Indigenous","Indonesian","Italian","Japanese","Kannada","Kazakh","Kirghiz","Korean","Latin","Latvian","Lithuanian","Malayalam","Marathi","Mongolian","Nepali","Norwegian","Odia","Persian","Polish","Portuguese","Romanian","Russian","Sanskrit","Serbian","Sinhala","Slovak","Slovenian","Somali","Spanish","Swahili","Swedish","Tajik","Tamil","Tatar","Telugu","Turkish","Ukrainian","Urdu","Uzbek","Vietnamese"]
-        Text {
-            text: "Language"
-            font.pixelSize: 35
-            font.family: "Maison Neue"
-            font.styleName: "Medium"
-            anchors {
-                bottom: parent.top
-                bottomMargin: 10
-            }
-        }
-        Component.onCompleted: currentIndex = find(storeFront.language, Qt.MatchExactly)
+        text: "Language"
+        anchors.left: toYear.right
+        width: 350
     }
 
-    ComboBox {
+    Filter {
         id: extension
-        anchors {
-            left: language.right
-            top: searchBox.bottom
-            topMargin: 90
-            leftMargin: 30
-        }
-        width: 200
-        height: 60
         model: ["Any","pdf","epub","djvu","fb2","txt","rar","mobi","lit","doc","rtf","azw3"]
-        Text {
-            text: "Extension"
-            font.pixelSize: 35
-            font.family: "Maison Neue"
-            font.styleName: "Medium"
-            anchors {
-                bottom: parent.top
-                bottomMargin: 10
-            }
-        }
-        Component.onCompleted: currentIndex = find(storeFront.extension, Qt.MatchExactly)
+        text: "Extension"
+        anchors.left: language.right
+        width: 200
     }
 
-    ComboBox {
+    Filter {
         id: order
-        anchors {
-            left: extension.right
-            top: searchBox.bottom
-            topMargin: 90
-            leftMargin: 30
-        }
-        width: 300
-        height: 60
         model: [ "Most Popular", "Best Match", "Recently added", "By Title (A-Z)", "By Title (Z-A)", "By Year", "File Size Asc.", "File Size Des." ]
-        Text {
-            text: "Sort by"
-            font.pixelSize: 35
-            font.family: "Maison Neue"
-            font.styleName: "Medium"
-            anchors {
-                bottom: parent.top
-                bottomMargin: 10
-            }
-        }
-        Component.onCompleted: currentIndex = find(storeFront.order, Qt.MatchExactly)
+        text: "Sort by"
+        anchors.left: extension.right
+        width: 350
     }
 
     Switch {
         id : exactMatch
         text: "Exact match"
-        anchors {
-            left: fromYear.left
-            top: fromYear.bottom
-            topMargin: 30
-        }
-        Component.onCompleted: storeFront.exactMatch == "1" && toggle()
+        x: 30
+        y: 280
     }
 
-    Rectangle {
+    FlatButton {
         id: startQuery
         width: 200
-        height: 80
-        color: "black"
-        radius: 3
+        bgColor: "black"
+        fgColor: "white"
+        text: "Search"
+        y: 400
         anchors {
             right: parent.right
-            top: exactMatch.bottom
-            topMargin: 40
             rightMargin: 40
         }
-        Text {
-            color: "white"
-            text: "Search"
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: 2
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            font.family:"Maison Neue"
-            font.styleName: "Bold"
-            font.pixelSize: 30
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: sendQuery()
-        }
+        onTapped: sendQuery()
     }
 
-    Rectangle {
+    FlatButton {
+        id: setDefaultQuery
         width: 350
-        height: 80
-        color: "white"
-        border.color: "black"
-        border.width: 3
-        radius: 3
+        bgColor: "white"
+        fgColor: "black"
+        text: "Set as default query"
+        borderWidth: 3
+        y: 400
         anchors {
-            right: startQuery.left
-            top: exactMatch.bottom
-            topMargin: 40
-            rightMargin: 20
+            left: parent.left
+            leftMargin: 40
         }
-        Text {
-            id: setDefaultText
-            color: "black"
-            text: "Set as default query"
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: 2
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            font.family:"Maison Neue"
-            font.styleName: "Bold"
-            font.pixelSize: 30
-        }
+        onTapped: {
+            storeFront.setConfig(
+                exactMatch.position,
+                fromYear.value(),
+                toYear.value(),
+                language.value(),
+                extension.value(),
+                order.value(),
+                textInput.text
+            );
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                storeFront.setConfig(
-                    exactMatch.position,
-                    fromYear.currentText,
-                    toYear.currentText,
-                    language.currentText,
-                    extension.currentText,
-                    order.currentText,
-                    textInput.text
-                );
-
-                setDefaultText.text = "✔";
-                resetButtonText.start()
-            }
+            setDefaultQuery.text = "✔";
+            resetButtonText.start();
         }
         Timer {
             id: resetButtonText
             interval: 3000; running: false; repeat: false
-            onTriggered: setDefaultText.text = "Set as default query";
+            onTriggered: setDefaultQuery.text = "Set as default query";
+        }
+    }
+    
+    FlatButton {
+        id: resetFilter
+        width: 250
+        bgColor: "white"
+        fgColor: "black"
+        text: "Reset query"
+        borderWidth: 3
+        y: 400
+        anchors {
+            left: setDefaultQuery.right
+            leftMargin: 30
+        }
+        onTapped: {
+            if (exactMatch.position == 1.0)
+                exactMatch.toggle();
+
+            fromYear.reset();
+            toYear.reset();
+            language.reset();
+            extension.reset();
+            order.reset();
+            textInput.text = "";
         }
     }
 

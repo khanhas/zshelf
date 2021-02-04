@@ -50,8 +50,11 @@ module.exports = function (args, socket) {
             dlUrl,
             similars,
         }));
+        socket.write("\n");
+        socket.end();
     })
         .catch(err => {
             socket.write("ERR: " + err + "\n");
+            socket.end();
         });
 }

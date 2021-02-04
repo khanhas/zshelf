@@ -58,6 +58,27 @@
         "qtplugin": "cpp",
         "qtgui": "cpp",
         "qprocess": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "cassert": "cpp",
+        "cerrno": "cpp",
+        "cfloat": "cpp",
+        "chrono": "cpp",
+        "climits": "cpp",
+        "complex": "cpp",
+        "condition_variable": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "ratio": "cpp",
+        "future": "cpp",
+        "iomanip": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "mutex": "cpp",
+        "queue": "cpp",
+        "thread": "cpp",
+        "cinttypes": "cpp",
+        "variant": "cpp"
     }
 }

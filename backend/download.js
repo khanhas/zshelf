@@ -52,6 +52,7 @@ module.exports = function (args, socket) {
 
         response.body.on("error", (error) => {
             socket.write("ERR: " + error + "\n");
+            socket.end();
         });
 
         response.body.on('end', () => {
@@ -88,5 +89,6 @@ module.exports = function (args, socket) {
     })
         .catch(err => {
             socket.write("ERR: " + err + "\n");
+            socket.end();
         });
 }

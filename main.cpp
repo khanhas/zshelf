@@ -20,6 +20,9 @@ int main(int argc, char *argv[])
     auto context = view.rootContext();
     context->setContextProperty("screenGeometry", app.primaryScreen()->geometry());
     context->setContextProperty("store", &view);
+    context->setContextProperty("storeProg", QVariant(0));
+    context->setContextProperty("storeError", QVariant(""));
+    context->setContextProperty("titleVisible", QVariant(true));
 
     QFontDatabase::addApplicationFont(":/fonts/MaisonNeue-Bold");
     QFontDatabase::addApplicationFont(":/fonts/MaisonNeue-Demi");
@@ -33,5 +36,7 @@ int main(int argc, char *argv[])
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&view]() { delete &view; });
 
     view.show();
+    view.open();
+
     return app.exec();
 }

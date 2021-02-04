@@ -1,6 +1,6 @@
 import QtQuick 2.11
 import QtQuick.Controls 2.4
-import QtQuick.Layouts 1.0
+import QtQuick.Layouts 1.11
 
 Rectangle {
     id: canvas
@@ -12,7 +12,19 @@ Rectangle {
     readonly property int itemPerPage: rows * columns
     readonly property int bookWidth: (width - screenMargin * 2) / columns
     readonly property int itemContentWidth: bookWidth - 20
-    Component.onCompleted: console.log()
+
+    Rectangle {
+        id: title
+        visible: titleVisible
+        z: 3
+        anchors.fill: parent
+        color: "white"
+        Image {
+            id: titleImg
+            source: "svg/title"
+            anchors.centerIn: parent
+        }
+    }
 
     Rectangle {
         id: closeApp
@@ -72,6 +84,7 @@ Rectangle {
             }
         }
         Rectangle {
+            id: accountStatus
             width: accountStatusText.contentWidth + 60
             height: 60
             visible: store.accountStatus.length > 0
@@ -95,9 +108,13 @@ Rectangle {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: 2
             }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: downloadList.open()
+            }
         }
     }
-    
+
     GridView {
         id: libView
         objectName: "libView"
@@ -215,7 +232,7 @@ Rectangle {
                 onClicked: {
                     model.modelData.getDetail(itemInfo);
                     itemInfo.model = model.modelData;
-                    itemInfo.popup.open();
+                    itemInfo.open();
                 }
                 onPressAndHold: {
                     return;
@@ -305,7 +322,7 @@ Rectangle {
 
     BookPopup {
         id: itemInfo
-        anchors.fill: parent
+        // anchors.fill: parent
     }
     
     Query {
@@ -315,13 +332,38 @@ Rectangle {
         storeFront: store
     }
 
-    Image {
-        z: 3
-        source: "png/loading"
-        visible: store.isBusy
-        width: 100
-        height: 100
+    DownloadPopup {
+        id: downloadList
+    }
+
+    Text {
+        id: errorMessage
+        text: storeError
+        font.family: "Maison Neue"
+        font.styleName: "Medium"
+        font.pixelSize: 40
+        width: 800
         anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.Wrap
+    }
+
+    Rectangle {
+        z: 4
+        visible: store.isBusy
+        color: "black"
+        width: 344; height: 2
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: 80
+
+        Rectangle {
+            color: "black";
+            width: storeProg * 344
+            height: 15
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+        }
+
         onVisibleChanged: {
             if (!visible && queryUI.visible) {
                 queryUI.visible = false;
@@ -330,6 +372,7 @@ Rectangle {
 
         Rectangle {
             id: cancleButton
+            visible: !titleVisible
             color: "black"
             width: 200
             height: 70

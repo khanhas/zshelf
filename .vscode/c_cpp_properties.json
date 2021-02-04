@@ -4,19 +4,22 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "/usr/local/oecore-x86_64/sysroots/cortexa9hf-neon-oe-linux-gnueabi/usr/include/**",
                 "/usr/local/oecore-x86_64/sysroots/cortexa9hf-neon-oe-linux-gnueabi/usr/include/c++/7.3.0/**",
-                "/usr/local/oecore-x86_64/sysroots/cortexa9hf-neon-oe-linux-gnueabi/usr/include/c++/7.3.0/arm-oe-linux-gnueabi/**",
                 "/usr/local/oecore-x86_64/sysroots/cortexa9hf-neon-oe-linux-gnueabi/usr/include/c++/7.3.0/backward/**",
-                "/usr/local/oecore-x86_64/sysroots/x86_64-oesdk-linux/usr/lib/arm-oe-linux-gnueabi/gcc/arm-oe-linux-gnueabi/7.3.0/include/**",
+                "/usr/local/oecore-x86_64/sysroots/cortexa9hf-neon-oe-linux-gnueabi/usr/include/c++/7.3.0/arm-oe-linux-gnueabi/**",
                 "/usr/local/oecore-x86_64/sysroots/cortexa9hf-neon-oe-linux-gnueabi/usr/lib/gcc/arm-oe-linux-gnueabi/7.3.0/include/**",
-                "/usr/local/oecore-x86_64/sysroots/x86_64-oesdk-linux/usr/lib/arm-oe-linux-gnueabi/gcc/arm-oe-linux-gnueabi/7.3.0/include-fixed/**",
-                "/usr/local/oecore-x86_64/sysroots/cortexa9hf-neon-oe-linux-gnueabi/usr/include/**"
+                "/usr/local/oecore-x86_64/sysroots/x86_64-oesdk-linux/usr/lib/arm-oe-linux-gnueabi/gcc/arm-oe-linux-gnueabi/7.3.0/include/**",
+                "/usr/local/oecore-x86_64/sysroots/x86_64-oesdk-linux/usr/lib/arm-oe-linux-gnueabi/gcc/arm-oe-linux-gnueabi/7.3.0/include-fixed/**"
             ],
-            "defines": [],
+            "defines": [
+                "__ARM_PCS_VFP",
+                "_MIPS_SIM"
+            ],
             "compilerPath": "/usr/local/oecore-x86_64/sysroots/x86_64-oesdk-linux/usr/bin/arm-oe-linux-gnueabi/arm-oe-linux-gnueabi-g++",
             "cStandard": "c11",
             "cppStandard": "c++11",
-            "intelliSenseMode": "linux-clang-arm"
+            "intelliSenseMode": "linux-gcc-arm64"
         }
     ],
     "version": 4

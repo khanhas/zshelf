@@ -53,24 +53,28 @@ public:
             sock.write("\n", 1);
         }
         sock.waitForBytesWritten();
+        QByteArray bytes;
+        while (sock.waitForReadyRead() || sock.canReadLine())
+        {
+            QByteArray line = sock.readLine();
+
+            if (line.startsWith("PROG:"))
+            {
+                emit updateProgress(line.mid(5).trimmed().toInt());
+                continue;
+            }
+
+            if (isReadAll)
+                bytes.push_back(line);
+            else
+                emit updateStatus(line);
+
+            if (line.startsWith("ERR:")) break;
+        }
 
         if (isReadAll)
-        {
-            sock.waitForReadyRead();
-            emit readAll(sock.readLine());
-        }
-        else
-        {
-            while (sock.waitForReadyRead() || sock.canReadLine())
-            {
-                QString str = sock.readLine();
+            emit readAll(bytes);
 
-                if (str.startsWith("PROG:"))
-                    emit updateProgress(str.section(':', 1, 1).toInt());
-                else
-                    emit updateStatus(str);
-            }
-        }
         sock.close();
         emit socketClosed();
         qDebug() << "[SOCKET]" << args[0] << "Closed";
