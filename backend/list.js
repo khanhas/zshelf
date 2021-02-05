@@ -66,7 +66,7 @@ module.exports = function (args, socket) {
         });
 
     function sendResult(html) {
-        const $ = cheerio.load(html, { _useHtmlParser2: true });
+        const $ = cheerio.load(html);
 
         let totalItems = $(".totalCounter")
         if (totalItems) {
@@ -88,7 +88,7 @@ module.exports = function (args, socket) {
             } else {
                 imageUrl = image.attr('data-src');
             }
-            if (imageUrl && imageUrl[0] === "/") imageUrl = "";
+            if (!imageUrl || imageUrl[0] === "/") imageUrl = "";
 
             return {
                 url: $(ele).find('h3 a').attr('href'),

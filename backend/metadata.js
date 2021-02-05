@@ -9,7 +9,7 @@ module.exports = function (args, socket) {
     }
 
     fetch(domain + args[0], fetchOptions).then(a => a.text()).then(html => {
-        const $ = cheerio.load(html, { _useHtmlParser2: true });
+        const $ = cheerio.load(html);
 
         const author = $(`[itemprop="author"]`)
             .toArray()

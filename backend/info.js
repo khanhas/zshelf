@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 
 module.exports = function (args, socket) {
     const profile = fetch(domain + "/profile.php", fetchOptions).then(res => res.text()).then(html => {
-        const $ = cheerio.load(html, { _useHtmlParser2: true });
+        const $ = cheerio.load(html);
         const rows = $(".counter-value");
         if (!rows.length) return;
         return ({
@@ -13,10 +13,14 @@ module.exports = function (args, socket) {
             corrections: $(rows[2]).text().replace(/\s/g, ""),
             donation: $(rows[3]).text().replace(/\s/g, "")
         });
-    });
+    })
+        .catch(err => {
+            socket.write("ERR: 1 " + err + "\n");
+            socket.end();
+        });
 
     const history = fetch(domain + "/users/dstats.php?today", fetchOptions).then(res => res.text()).then(html => {
-        const $ = cheerio.load(html, { _useHtmlParser2: true });
+        const $ = cheerio.load(html);
         const rows = $(".dstats-row");
         if (!rows.length) return;
 
@@ -33,7 +37,11 @@ module.exports = function (args, socket) {
             return ({ url, name });
         })
             .filter(a => a);
-    });
+    })
+        .catch(err => {
+            socket.write("ERR: 1 " + err + "\n");
+            socket.end();
+        });
 
     Promise.all([profile, history]).then(results => {
         if (!results || results.length < 2) return;
