@@ -1,4 +1,4 @@
-const { writeFile, copyFile, existsSync, mkdirSync, createWriteStream } = require("fs");
+const { writeFileSync, copyFileSync, existsSync, mkdirSync, createWriteStream, constants } = require("fs");
 const { join: pathJoin, extname, basename } = require("path");
 const { v4 } = require("uuid");
 const { domain, fetchOptions, additionalBookLocation } = require("./common");
@@ -25,6 +25,8 @@ module.exports = function (args, socket) {
             const nameMatch = disposition.match(/filename="(.+)"/);
             if (nameMatch) {
                 let name = nameMatch[1].replace(" (z-lib.org)", "");
+                // Convert multi-byte chars to their true representation
+                name = Buffer.from(name, "binary").toString("utf8");
 
                 fileExt = extname(name);
                 fileName = basename(name, fileExt);
@@ -47,7 +49,7 @@ module.exports = function (args, socket) {
 
         response.body.on("data", (chunk) => {
             fileStream.write(chunk);
-            socket.write("PROG:" + Math.floor(fileStream.bytesWritten / fileLength * 100).toString() + "\n");
+            socket.write("PROG:" + Math.floor(fileStream.bytesWritten / fileLength * 95).toString() + "\n");
         });
 
         response.body.on("error", (error) => {
@@ -56,13 +58,10 @@ module.exports = function (args, socket) {
         });
 
         response.body.on('end', () => {
-            socket.write("PROG:100\n");
-            socket.end();
-
-            console.log("DOWNLOAD DONE");
+            socket.write("DOWNLOAD DONE\n");
 
             if (fileExt == ".epub" || fileExt == ".pdf") {
-                writeFile(xochitlFolder + uuid + ".metadata", JSON.stringify({
+                writeFileSync(xochitlFolder + uuid + ".metadata", JSON.stringify({
                     "deleted": false,
                     "lastModified": "1",
                     "lastOpenedPage": 0,
@@ -74,17 +73,21 @@ module.exports = function (args, socket) {
                     "type": "DocumentType",
                     "version": 1,
                     "visibleName": fileName
-                }), () => { });
+                }));
 
-                copyFile(tempFilePath, pathJoin(xochitlFolder, uuid + fileExt), () => { console.log("COPIED XOCHITL") });
+                copyFileSync(tempFilePath, pathJoin(xochitlFolder, uuid + fileExt), constants.COPYFILE_FICLONE);
+                socket.write("COPIED XOCHITL\n");
             }
 
             if (additionalBookLocation) {
                 if (!existsSync(additionalBookLocation)) {
                     mkdirSync(additionalBookLocation, { recursive: true });
                 }
-                copyFile(tempFilePath, pathJoin(additionalBookLocation, fileName + fileExt), () => { console.log("COPIED LOCAL") });
+                copyFileSync(tempFilePath, pathJoin(additionalBookLocation, fileName + fileExt), constants.COPYFILE_FICLONE);
+                socket.write("COPIED LOCAL\n");
             }
+            socket.write("PROG:100\n");
+            socket.end();
         });
     })
         .catch(err => {

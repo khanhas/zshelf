@@ -71,10 +71,7 @@ module.exports = function (args, socket) {
         let totalItems = $(".totalCounter")
         if (totalItems) {
             totalItems = parseInt(totalItems.text().replace(/[()+]/g, "")); 
-            if (totalItems > 50) {
-                const totalPages = Math.ceil(totalItems / 50);
-                socket.write("TOTAL:" + totalPages.toString() + "\n");
-            }
+            socket.write("TOTAL:" + totalItems.toString() + "\n");
         }
 
         const books = $(".resItemBoxBooks").get().map(ele => {

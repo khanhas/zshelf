@@ -14,10 +14,18 @@ Store::Store() : rootView(rootObject()), context(rootContext())
         if (stat.startsWith("TOTAL:"))
         {
             // Hacky trick to force redrawing Repeater
-            _totalPages = 0;
-            emit totalPagesChanged();
-            _totalPages = stat.mid(6).trimmed().toInt();
-            emit totalPagesChanged();
+            QStringList pagesList;
+            setProperty("pages", QVariant::fromValue(pagesList));
+
+            int totalItems = stat.mid(6).trimmed().toInt();
+            if (totalItems < 50)
+                return;
+
+            for (int i = 50; i < totalItems; i += 50)
+                pagesList.push_back(QString::number(i));
+
+            pagesList.push_back(QString::number(totalItems));
+            setProperty("pages", QVariant::fromValue(pagesList));
         }
     });
     connect(worker, &Worker::updateProgress, this, [this](int prog) {
@@ -294,18 +302,25 @@ bool Store::setConfig()
 
 void Store::download(Book* book)
 {
-    book->worker = new Worker({"DOWN", book->_dlUrl});
-    connect(book->worker, &Worker::updateProgress, book, &Book::updateProgress);
-    connect(book->worker, &Worker::updateStatus, book, [book](QString stat) {
-        qDebug() << "LOG: " << stat;
-        if (stat.startsWith("ERR:"))
-        {
-            book->setProperty("status", QVariant(stat.trimmed()));
-            book->worker->terminate();
-            delete book->worker;
-        }
-    });
-    connect(book->worker, &Worker::socketClosed, book, [book]() { delete book->worker; });
+    if (book->worker == nullptr) {
+        book->worker = new Worker({"DOWN", book->_dlUrl});
+        connect(book->worker, &Worker::updateProgress, book, &Book::updateProgress);
+        connect(book->worker, &Worker::updateStatus, book, [book](QString stat) {
+            qDebug() << "LOG: " << stat;
+            if (stat.startsWith("ERR:"))
+            {
+                book->setProperty("status", QVariant(stat.trimmed()));
+                book->worker->terminate();
+                delete book->worker;
+            }
+        });
+        connect(book->worker, &Worker::socketClosed, book, [book]() {
+            if (infoThread != nullptr && !infoThread->isRunning())
+            {
+                infoThread->work();
+            }
+        });
+    }
 
     book->setParent(nullptr);
     _downloadList.prepend(book);
@@ -379,10 +394,6 @@ void Book::updateProgress(int prog)
     if (prog == 100)
     {
         setProperty("status", QVariant("Downloaded"));
-        if (infoThread != nullptr && !infoThread->isRunning())
-        {
-            infoThread->work();
-        }
         return;
     }
     setProperty("status", QVariant(QString::number(prog) + "%"));

@@ -130,7 +130,6 @@ Rectangle {
         flow: GridView.TopToBottom
         clip: true
         snapMode: GridView.SnapToRow
-        // pixelAligned: true
         flickDeceleration: 0
         onMovementEnded: currentIndex = indexAt(contentX, 0)
 
@@ -247,7 +246,7 @@ Rectangle {
         anchors.leftMargin: screenMargin
         anchors.bottomMargin: screenMargin + 10
         Repeater {
-            model: store.totalPages
+            model: store.pages
             Rectangle {
                 width: 100; height: 60
                 Rectangle {
@@ -259,7 +258,7 @@ Rectangle {
                     color: "white"
                 }
                 Text {
-                    text: (index + 1) * 50
+                    text: modelData
                     anchors.centerIn: bg
                     anchors.verticalCenterOffset: 2
                     horizontalAlignment: Text.AlignHCenter

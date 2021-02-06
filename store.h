@@ -70,7 +70,7 @@ public:
     Q_PROPERTY(QString order MEMBER _order)
     Q_PROPERTY(QString query MEMBER _query)
     Q_PROPERTY(QString accountStatus MEMBER _accountStatus NOTIFY accountStatusChanged)
-    Q_PROPERTY(int totalPages MEMBER _totalPages NOTIFY totalPagesChanged)
+    Q_PROPERTY(QStringList pages MEMBER _pages NOTIFY pagesChanged)
     Q_PROPERTY(int currentPage MEMBER _currentPage NOTIFY currentPageChanged)
 
     Store();
@@ -89,7 +89,7 @@ signals:
     void downloadListChanged();
     void isBusyChanged();
     void accountStatusChanged();
-    void totalPagesChanged();
+    void pagesChanged();
     void currentPageChanged();
 
 private:
@@ -111,7 +111,7 @@ private:
     QString _accountStatus;
 
     bool _cookieAvailable;
-    int _totalPages = 0;
+    QStringList _pages = { "10", "20", "30"};
     int _currentPage = 0;
 };
 
