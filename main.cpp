@@ -3,6 +3,7 @@
 #include <QtPlugin>
 #include "store.h"
 #include "quickvirtualkeyboard/register.h"
+#include "grayImage.h"
 
 Q_IMPORT_PLUGIN(QsgEpaperPlugin)
 
@@ -29,6 +30,7 @@ int main(int argc, char *argv[])
     QFontDatabase::addApplicationFont(":/fonts/MaisonNeue-Medium");
 
     view.engine()->addImportPath(QStringLiteral(DEPLOYMENT_PATH));
+    view.engine()->addImageProvider(QLatin1String("gray"), new GrayImageProvider);
     registerQmlTypes();
     view.setSource(QUrl(QStringLiteral("qrc:/Main.qml")));
 

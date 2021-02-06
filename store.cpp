@@ -38,6 +38,7 @@ Store::Store() : rootView(rootObject()), context(rootContext())
     connect(worker, &Worker::readAll, this, [this](QByteArray bytes) {
         if (booksParent != nullptr) {
             delete booksParent;
+            booksParent = nullptr;
         }
 
         _books.clear();
@@ -79,6 +80,9 @@ Store::Store() : rootView(rootObject()), context(rootContext())
             item->_name = bookObj.value("name").toString();
             item->_author = bookObj.value("author").toString();
             item->_imgFile = bookObj.value("img").toString();
+            if (item->_imgFile.size() > 0) {
+                item->_imgFile.prepend("image://gray/");
+            }
             item->_url = bookObj.value("url").toString();
 
             _books.push_back(item);
@@ -362,7 +366,12 @@ void Book::getDetail(QObject* popup)
         setProperty("author", detail.value("author").toString());
         setProperty("dlUrl", detail.value("dlUrl").toString());
         setProperty("desc", detail.value("description").toString());
-        setProperty("imgFile", detail.value("img").toString());
+        auto imgFile = detail.value("img").toString();
+        if (imgFile.size() > 0)
+        {
+            imgFile.prepend("image://gray/");
+        }
+        setProperty("imgFile", imgFile);
 
         QJsonArray similarsArray = detail.value("similars").toArray();
         QList<QObject *> recList;

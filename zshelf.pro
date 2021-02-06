@@ -21,7 +21,8 @@ SOURCES = main.cpp \
 
 HEADERS = \
     worker.h \
-    store.h
+    store.h \
+    grayImage.h
 
 RESOURCES += qml.qrc
 
