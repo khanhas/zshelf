@@ -17,10 +17,16 @@ Popup {
     padding: 40
 
     Overlay.modeless: Rectangle {
-        color: "#90505050"
+        color: "#90ffffff"
         MouseArea {
             anchors.fill: parent
         }
+    }
+
+    background: Rectangle {
+        border.width: 2
+        border.color: "black"
+        radius: 5
     }
 
     onOpened: bar.currentIndex = 0;
@@ -183,30 +189,20 @@ Popup {
         }
     ]
 
-    Rectangle {
+    FlatButton {
         id: download
         visible: !isBusy
         width: 300
-        height: 80
         x: parent.width - 220
-        y: parent.height
-        color: "black"
-        Text {
-            anchors.centerIn: parent
-            text: !model || !model.dlUrl ? "Unavailable" : model.status
-            font.family:"Maison Neue"
-            font.styleName: "Medium"
-            font.pixelSize: 30
-            color: "white"
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                if(!model || !model.dlUrl || model.status !== "Download") {
-                    return
-                }
-                store.download(model);
+        y: parent.height - 5
+        bgColor: "black"
+        fgColor: "white"
+        text: !model || !model.dlUrl ? "Unavailable" : model.status
+        onTapped: {
+            if(!model || !model.dlUrl || model.status !== "Download") {
+                return
             }
+            store.download(model);
         }
     }
 }

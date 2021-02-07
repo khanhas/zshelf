@@ -138,7 +138,7 @@ void Store::open()
             if (downloads.length() > 0)
             {
                 auto counts = downloads.split("/");
-                downloads.prepend("Downloads: ");
+                downloads.prepend("↓ ");
                 if (counts[0] == counts[1])
                 {
                     downloads.prepend("⚠️ ");

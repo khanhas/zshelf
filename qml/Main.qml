@@ -60,23 +60,13 @@ Rectangle {
         height: 100
 
         Rectangle {
-            width: 250
+            width: 150
             height: 80
 
             Image {
                 source: "png/searchblack"
                 width: 80
                 height: 80
-            }
-            Text {
-                text: "Search"
-                font.pixelSize: 30
-
-                font.family:"Maison Neue"
-                font.styleName: "Demi"
-                verticalAlignment: Text.AlignVCenter
-                height: parent.height
-                x: 100
             }
             MouseArea {
                 anchors.fill: parent
@@ -89,7 +79,7 @@ Rectangle {
             height: 60
             visible: store.accountStatus.length > 0
             border.color: "black"
-            border.width: 3
+            border.width: 2
             radius: 30
             color: "white"
             anchors {
@@ -151,7 +141,7 @@ Rectangle {
                 font.pixelSize:25
                 width: itemContentWidth
                 anchors.bottom: parent.bottom
-                anchors.bottomMargin: 60
+                anchors.bottomMargin: 50
                 anchors.horizontalCenter: parent.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
                 maximumLineCount: 1
@@ -171,14 +161,13 @@ Rectangle {
                 maximumLineCount: 2
                 wrapMode: Text.Wrap
             }
-            
             Image {
                 id: image
                 fillMode: Image.PreserveAspectFit
                 width: 200
                 source: model.modelData.imgFile || "png/book"
                 anchors.centerIn: parent
-                anchors.verticalCenterOffset: -50
+                anchors.verticalCenterOffset: -60
                 Image {
                     visible: image.status === Image.Error
                     source: "png/book"

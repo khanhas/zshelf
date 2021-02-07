@@ -59,7 +59,7 @@ Item {
     Rectangle {
         id: searchBox
         color: "black"
-        height: 90
+        height: 110
         anchors {
             left: parent.left
             right: parent.right
@@ -112,6 +112,7 @@ Item {
                 font.family: "Maison Neue"
                 font.bold: true
                 anchors.centerIn: parent
+                anchors.verticalCenterOffset: 2
             }
             MouseArea {
                 anchors.fill: parent
@@ -120,68 +121,102 @@ Item {
         }
     }
 
-    Filter {
-        id: fromYear
-        model: {
-            let a = ["Any"];
-            let thisYear = (new Date).getFullYear();
-            while (thisYear >= 1800) {
-                a.push(thisYear);
-                thisYear--;
-            }
-            return a;
+    Row {
+        anchors {
+            left: parent.left
+            leftMargin: screenMargin
+            top: searchBox.bottom
+            topMargin: 30
         }
-        anchors.left: parent.left
-        width: 150
-        text: "From"
-        onActivated: {
-            let oldIndex = toYear.curIndex;
-            toYear.model = index > 0 ? fromYear.model.slice(0, index + 1) : fromYear.model;
-            if (oldIndex <= index) {
-                toYear.curIndex = oldIndex;
-            } else {
-                toYear.curIndex = index;
+        spacing: 33
+
+        Filter {
+            id: fromYear
+            model: {
+                let a = ["Any"];
+                let thisYear = (new Date).getFullYear();
+                while (thisYear >= 1800) {
+                    a.push(thisYear);
+                    thisYear--;
+                }
+                return a;
+            }
+            width: 150
+            text: "From"
+            onActivated: {
+                let oldIndex = toYear.curIndex;
+                toYear.model = index > 0 ? fromYear.model.slice(0, index + 1) : fromYear.model;
+                if (oldIndex <= index) {
+                    toYear.curIndex = oldIndex;
+                } else {
+                    toYear.curIndex = index;
+                }
             }
         }
-    }
 
-    Filter {
-        id: toYear
-        model: fromYear.model
-        text: "To"
-        anchors.left: fromYear.right
-        width: 150
-    }
+        Filter {
+            id: toYear
+            model: fromYear.model
+            text: "To"
+            width: 150
+        }
 
-    Filter {
-        id: language
-        model: ["Any","Afrikaans","Albanian","Arabic","Armenian","Azerbaijani","Bashkir","Belarusian","Bengali","Berber","Bulgarian","Catalan","Chinese","Crimean Tatar","Croatian","Czech","Danish","Dutch","English","Esperanto","Finnish","French","Georgian","German","Greek","Gujarati","Hebrew","Hindi","Hungarian","Icelandic","Indigenous","Indonesian","Italian","Japanese","Kannada","Kazakh","Kirghiz","Korean","Latin","Latvian","Lithuanian","Malayalam","Marathi","Mongolian","Nepali","Norwegian","Odia","Persian","Polish","Portuguese","Romanian","Russian","Sanskrit","Serbian","Sinhala","Slovak","Slovenian","Somali","Spanish","Swahili","Swedish","Tajik","Tamil","Tatar","Telugu","Turkish","Ukrainian","Urdu","Uzbek","Vietnamese"]
-        text: "Language"
-        anchors.left: toYear.right
-        width: 350
-    }
+        Filter {
+            id: language
+            model: ["Any","Afrikaans","Albanian","Arabic","Armenian","Azerbaijani","Bashkir","Belarusian","Bengali","Berber","Bulgarian","Catalan","Chinese","Crimean Tatar","Croatian","Czech","Danish","Dutch","English","Esperanto","Finnish","French","Georgian","German","Greek","Gujarati","Hebrew","Hindi","Hungarian","Icelandic","Indigenous","Indonesian","Italian","Japanese","Kannada","Kazakh","Kirghiz","Korean","Latin","Latvian","Lithuanian","Malayalam","Marathi","Mongolian","Nepali","Norwegian","Odia","Persian","Polish","Portuguese","Romanian","Russian","Sanskrit","Serbian","Sinhala","Slovak","Slovenian","Somali","Spanish","Swahili","Swedish","Tajik","Tamil","Tatar","Telugu","Turkish","Ukrainian","Urdu","Uzbek","Vietnamese"]
+            text: "Language"
+            width: 350
+        }
 
-    Filter {
-        id: extension
-        model: ["Any","pdf","epub","djvu","fb2","txt","rar","mobi","lit","doc","rtf","azw3"]
-        text: "Extension"
-        anchors.left: language.right
-        width: 200
-    }
+        Filter {
+            id: extension
+            model: ["Any","pdf","epub","djvu","fb2","txt","rar","mobi","lit","doc","rtf","azw3"]
+            text: "Extension"
+            width: 200
+        }
 
-    Filter {
-        id: order
-        model: [ "Most Popular", "Best Match", "Recently added", "By Title (A-Z)", "By Title (Z-A)", "By Year", "File Size Asc.", "File Size Des." ]
-        text: "Sort by"
-        anchors.left: extension.right
-        width: 350
+        Filter {
+            id: order
+            model: [ "Most Popular", "Best Match", "Recently added", "By Title (A-Z)", "By Title (Z-A)", "By Year", "File Size Asc.", "File Size Des." ]
+            text: "Sort by"
+            width: 350
+        }
     }
 
     Switch {
         id : exactMatch
-        text: "Exact match"
-        x: 30
+        x: screenMargin
         y: 280
+
+        indicator: Rectangle {
+            width: 80
+            height: 40
+            y: parent.height / 2 - height / 2
+            radius: 20
+            color: exactMatch.checked ? "black" : "white"
+            border.color: "black"
+            border.width: 1
+
+            Rectangle {
+                x: exactMatch.checked ? parent.width - width : 0
+                width: 40
+                height: 40
+                radius: 20
+                color: "white"
+                border.color: "black"
+                border.width: 1
+            }
+        }
+
+        contentItem: Text {
+            text: "          Exact match"
+            font.family: "Maison Neue"
+            font.bold: true
+            font.pixelSize: 35
+            color: "black"
+            height: 40
+            verticalAlignment: Text.AlignVCenter
+        }
     }
 
     FlatButton {

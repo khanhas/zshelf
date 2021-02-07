@@ -2,6 +2,7 @@ import QtQuick 2.5
 import QtQuick.Controls 2.4
 
 Item {
+    id: root
     signal activated(int index);
     property alias model: combo.model
     property alias text: name.text
@@ -21,11 +22,7 @@ Item {
         return combo.currentText;
     }
 
-    anchors {
-        leftMargin: 33
-        top: searchBox.bottom
-        topMargin: 30
-    }
+    height: 100
 
     Text {
         id: name
@@ -41,6 +38,10 @@ Item {
         }
         width: parent.width
         height: 60
+
+        font.family: "Maison Neue"
+        font.styleName: "light"
+
         background: Rectangle {
             border.width: 2
             border.color: "black"
@@ -56,10 +57,46 @@ Item {
                 verticalCenterOffset: 2
             }
             verticalAlignment: Text.AlignVCenter
-            font.family: "Maison Neue"
-            font.styleName: "light"
             color: "black"
         }
+
+        delegate: ItemDelegate {
+            width: root.width - 25
+            contentItem: Text {
+                text: modelData
+                color: "black"
+                font.family: "Maison Neue"
+                font.styleName: "light"
+                font.bold: combo.highlightedIndex === index
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+
+        popup: Popup {
+            readonly property int columns: combo.model.length > 12 ? 2 : 1
+            y: combo.height + 20
+            width: root.width * columns
+            implicitHeight: Math.min(contentItem.contentHeight + 20, 800)
+            clip: true
+
+            contentItem: GridView {
+                id: grid
+                flow: GridView.FlowLeftToRight
+                model: combo.popup.visible ? combo.delegateModel : null
+                currentIndex: combo.highlightedIndex
+                cellWidth: root.width - 15
+                cellHeight: combo.height
+
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+            }
+
+            background: Rectangle {
+                border.color: "black"
+                border.width: 2
+                radius: 3
+            }
+        }
+
         onActivated: parent.activated(index);
     }
 }

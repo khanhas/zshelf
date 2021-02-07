@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.11
 Popup {
     id: downloadPopup
     width: 500
-    height: Math.min(downloadListView.contentHeight, 1000)
+    height: Math.min(downloadListView.contentHeight + 10, 1000)
     x: accountStatus.x + accountStatus.width - 500 + screenMargin
     y: accountStatus.y + accountStatus.height + 60
 

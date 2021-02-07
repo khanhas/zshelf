@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QPainter>
 
 class AsyncImageResponse : public QQuickImageResponse
 {
@@ -23,7 +24,20 @@ public:
 
             QByteArray bytes = rep->readAll();
             QImage img = QImage::fromData(bytes).convertToFormat(QImage::Format_Grayscale8);
-            _img = img;
+
+            _img = QImage(img.size(), QImage::Format_ARGB32);
+            _img.fill(Qt::transparent);
+            QPainter p(&_img);
+            p.setBrush(QBrush(img));
+            p.setPen(Qt::NoPen);
+            qreal radius = 8.0;
+            if (img.width() > 200) {
+                p.setRenderHint(QPainter::Antialiasing, true);
+                radius = 16.0;
+            }
+            p.drawRoundedRect(1, 1, img.width() - 2, img.height() - 2, radius, radius);
+            p.end();
+
             emit finished();
         });
 
