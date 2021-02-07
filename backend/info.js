@@ -49,7 +49,6 @@ module.exports = function (args, socket) {
         const final = results[0];
         final.today_list = results[1];
         socket.write(JSON.stringify(final));
-        socket.write("\n");
         socket.end();
     })
         .catch(err => {

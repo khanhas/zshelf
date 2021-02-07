@@ -95,7 +95,6 @@ module.exports = function (args, socket) {
             }
         });
         socket.write(JSON.stringify(books));
-        socket.write("\n");
         socket.end();
     }
 }

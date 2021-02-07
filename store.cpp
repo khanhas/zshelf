@@ -1,5 +1,6 @@
 #include "store.h"
 
+bool initialInfo = true;
 Worker *infoThread = nullptr;
 
 Store::Store() : rootView(rootObject()), context(rootContext())
@@ -34,6 +35,10 @@ Store::Store() : rootView(rootObject()), context(rootContext())
     connect(worker, &Worker::socketClosed, this, [this]() {
         context->setContextProperty("titleVisible", QVariant(false));
         setProperty("isBusy", false);
+        if (initialInfo) {
+            infoThread->work();
+            initialInfo = false;
+        }
     });
     connect(worker, &Worker::readAll, this, [this](QByteArray bytes) {
         if (booksParent != nullptr) {
@@ -168,7 +173,6 @@ void Store::open()
             }
             emit downloadListChanged();
         });
-        infoThread->work();
     }
     else
     {

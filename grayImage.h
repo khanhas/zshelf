@@ -23,24 +23,6 @@ public:
 
             QByteArray bytes = rep->readAll();
             QImage img = QImage::fromData(bytes).convertToFormat(QImage::Format_Grayscale8);
-
-            int w = m_requestedSize.width(), h = m_requestedSize.height();
-            if (w != -1)
-            {
-                if (h != -1)
-                {
-                    img = img.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-                }
-                else
-                {
-                    img = img.scaledToWidth(w, Qt::SmoothTransformation);
-                }
-            }
-            else if (h != -1)
-            {
-                img = img.scaledToHeight(h, Qt::SmoothTransformation);
-            }
-
             _img = img;
             emit finished();
         });
