@@ -48,8 +48,12 @@ module.exports = function (args, socket) {
         const fileStream = createWriteStream(tempFilePath);
 
         response.body.on("data", (chunk) => {
-            fileStream.write(chunk);
-            socket.write("PROG:" + Math.floor(fileStream.bytesWritten / fileLength * 95).toString() + "\n");
+            fileStream.write(chunk, () => {
+                socket.write("PROG:" + Math.floor(fileStream.bytesWritten / fileLength * 95).toString() + "\n");
+                if (fileStream.bytesWritten == fileLength) {
+                    fileStream.close();
+                }
+            });
         });
 
         response.body.on("error", (error) => {
@@ -57,7 +61,7 @@ module.exports = function (args, socket) {
             socket.end();
         });
 
-        response.body.on('end', () => {
+        fileStream.on('close', () => {
             socket.write("DOWNLOAD DONE\n");
 
             if (fileExt == ".epub" || fileExt == ".pdf") {
