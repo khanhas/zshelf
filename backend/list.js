@@ -103,6 +103,7 @@ function fetchList(listURL, socket) {
             }
         });
         socket.write(JSON.stringify(books));
+        socket.write("\n");
         socket.end();
     }
 }
