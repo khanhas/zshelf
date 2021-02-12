@@ -1,7 +1,10 @@
-# ZShelf
-[Z-Library](https://z-lib.org) browser and downloader for [reMarkable](https://remarkable.com/) devices
+# ![title](https://gist.githubusercontent.com/khanhas/40999296b19662cdc1f877505c35a934/raw/fdc223e2c557b7be2e5e68e87f93cb3950c8b887/zshelf_title.svg)
 
 <p align="center">
+  <a href="https://z-lib.org">Z-Library</a> browser and downloader for <a href="https://remarkable.com/">reMarkable</a> devices
+  <br>
+  <br>
+  <br>
   <img src="https://i.imgur.com/O4IzQfG.png" width="300" title="Browse">
   <img src="https://i.imgur.com/n9SnfxV.png" width="300" title="Book metadata">
   <img src="https://i.imgur.com/HsHWSEF.png" width="300" title="Search UI">
@@ -9,6 +12,7 @@
 
 ## Installation
 ### Requirement
+0. Know how to SSH to your device: https://remarkablewiki.com/tech/ssh
 1. NodeJS. Please use package manager [toltec](https://github.com/toltec-dev/toltec/) to install it:
 ```bash
 opkg update
@@ -20,8 +24,7 @@ opkg install rm2fb
 ```
 
 ### Download
-1. SSH to your reMarkable
-2. Run these command to download and unpack distributed package to `/home/root` location:
+In SSH session, run these command to download and unpack distributed package to `/home/root` location:
 ```bash
 cd /home/root
 wget "https://github.com/khanhas/zshelf/releases/download/v0.2.0/zshelf-reMarkable-0.2.0.zip"
