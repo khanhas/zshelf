@@ -5,9 +5,9 @@
   <br>
   <br>
   <br>
-  <img src="https://i.imgur.com/O4IzQfG.png" width="300" title="Browse">
-  <img src="https://i.imgur.com/n9SnfxV.png" width="300" title="Book metadata">
-  <img src="https://i.imgur.com/HsHWSEF.png" width="300" title="Search UI">
+  <img src="https://i.imgur.com/UbcwJ9L.png" width="300" title="Browse">
+  <img src="https://i.imgur.com/CWWoQfk.png" width="300" title="Book metadata">
+  <img src="https://i.imgur.com/38oxA3a.png" width="300" title="Search UI">
 </p>
 
 ## Installation
@@ -27,8 +27,8 @@ opkg install rm2fb
 In SSH session, run these command to download and unpack distributed package to `/home/root` location:
 ```bash
 cd /home/root
-wget "https://github.com/khanhas/zshelf/releases/download/v0.2.0/zshelf-reMarkable-0.2.0.zip"
-unzip "zshelf-reMarkable-0.2.0.zip"
+wget "https://github.com/khanhas/zshelf/releases/download/v0.2.0/zshelf-reMarkable-0.3.0.zip"
+unzip "zshelf-reMarkable-0.3.0.zip"
 ```
 
 ### [IMPORTANT] Configure domain and cookie
