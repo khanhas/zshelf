@@ -3,7 +3,7 @@ const cheerio = require("cheerio");
 const { domain, fetchOptions } = require("./common");
 const fetch = require("node-fetch");
 
-module.exports = function (args, socket) {
+module.exports.getList = function (args, socket) {
     let [isExact, fromYear, toYear, lang, ext, order, query, page] = args;
 
     let listURL = [domain + "/s/?"];
@@ -40,6 +40,14 @@ module.exports = function (args, socket) {
     if (page) listURL.push("page=" + page);
 
     listURL = listURL.join("&");
+    fetchList(listURL, socket);
+}
+
+module.exports.getSaved = function(_, socket) {
+    fetchList(domain + "/users/saved_books.php", socket);
+}
+
+function fetchList(listURL, socket) {
     fetch(listURL, fetchOptions).then(res => {
         const fileLength = parseInt(res.headers.get('content-length'));
 

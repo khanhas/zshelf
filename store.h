@@ -80,6 +80,7 @@ public:
 
 public slots:
     Q_INVOKABLE void newQuery(int page);
+    Q_INVOKABLE void openSavedList(int page);
     Q_INVOKABLE void stopQuery();
     Q_INVOKABLE bool setConfig();
     Q_INVOKABLE void download(Book*);

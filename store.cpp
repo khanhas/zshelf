@@ -202,6 +202,21 @@ void Store::newQuery(int page = 0)
     worker->work();
 }
 
+void Store::openSavedList(int page = 0)
+{
+    _currentPage = page;
+    QStringList args = {
+        "SAVE",
+        QString::number(page + 1)
+    };
+
+    stopQuery();
+    setProperty("isBusy", true);
+    worker->args = args;
+    context->setContextProperty("storeProg", QVariant(0.2));
+    worker->work();
+}
+
 void Store::stopQuery()
 {
     if (worker->isRunning())

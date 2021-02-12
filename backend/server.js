@@ -1,6 +1,6 @@
 const { execSync } = require("child_process");
 const net = require("net");
-const getList = require("./list");
+const { getList, getSaved } = require("./list");
 const getInfo = require("./info");
 const getMeta = require("./metadata");
 const download = require("./download");
@@ -32,6 +32,7 @@ server.on("connection", (client) => {
                 case "INFO": getInfo(arg, client); break;
                 case "META": getMeta(arg, client); break;
                 case "DOWN": download(arg, client); break;
+                case "SAVE": getSaved(arg, client); break;
             }
         } catch (err) {
             client.write("ERR: 0 " + err + "\n");

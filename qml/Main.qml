@@ -74,6 +74,29 @@ Rectangle {
             }
         }
         Rectangle {
+            id: savedList
+            width: 60
+            height: 60
+            border.color: "black"
+            border.width: 2
+            radius: 30
+            color: "white"
+            anchors {
+                right: parent.right
+                rightMargin: 120
+                top: parent.top
+                topMargin: 10
+            }
+            Image {
+                source: "png/bookmark"
+                anchors.centerIn: parent
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: store.openSavedList(0)
+            }
+        }
+        Rectangle {
             id: accountStatus
             width: accountStatusText.contentWidth + 60
             height: 60
@@ -83,8 +106,8 @@ Rectangle {
             radius: 30
             color: "white"
             anchors {
-                right: parent.right
-                rightMargin: 120
+                right: savedList.left
+                rightMargin: 30
                 top: parent.top
                 topMargin: 10
             }

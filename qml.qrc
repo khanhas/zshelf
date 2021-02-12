@@ -10,6 +10,7 @@
         <file alias="png/search">qml/search.png</file>
         <file alias="png/searchblack">qml/searchblack.png</file>
         <file alias="png/book">qml/book.png</file>
+        <file alias="png/bookmark">qml/bookmark.png</file>
         <file alias="svg/title">qml/title.svg</file>
         <file alias="fonts/MaisonNeue-Bold">fonts/MaisonNeue-Bold.ttf</file>
         <file alias="fonts/MaisonNeue-Demi">fonts/MaisonNeue-Demi.ttf</file>
