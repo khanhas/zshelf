@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.11
 Popup {
     id: downloadPopup
     width: 500
-    height: Math.min(downloadListView.contentHeight + 10, 1000)
+    height: store.downloadList.length ? Math.min(listView.contentHeight + 10, 1000) : 130
     x: accountStatus.x + accountStatus.width - 500 + screenMargin
     y: accountStatus.y + accountStatus.height + 60
 
@@ -28,8 +28,39 @@ Popup {
         radius: 5
     }
 
+    Rectangle {
+        visible: store.downloadList.length == 0
+        width: parent.width
+        height: 120
+        Text {
+            id: quote
+            text: "“ A room without books is like\na body without a soul.”"
+            font.family: "Maison Neue"
+            font.styleName: "Medium"
+            font.italic: true
+            font.pixelSize: 22
+            horizontalAlignment: Text.AlignRight
+            anchors {
+                top: parent.top
+                right: parent.right
+                topMargin: 25
+                rightMargin: 80
+            }
+        }
+        Text {
+            text: "— Cicero"
+            font.family: "Maison Neue"
+            font.styleName: "Bold"
+            font.pixelSize: 22
+            anchors.top: quote.bottom
+            anchors.topMargin: 10
+            anchors.right: quote.right
+            horizontalAlignment: Text.AlignRight
+        }
+    }
+
     ListView {
-        id: downloadListView
+        id: listView
         width: 500 - parent.padding * 2
         anchors.fill: parent
         model: store.downloadList
@@ -90,7 +121,6 @@ Popup {
                         itemInfo.model = model.modelData;
                         downloadPopup.close();
                         itemInfo.open();
-
                     }
                     onPressAndHold: {
                         return;
