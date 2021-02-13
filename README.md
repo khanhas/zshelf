@@ -27,7 +27,7 @@ opkg install rm2fb
 In SSH session, run these command to download and unpack distributed package to `/home/root` location:
 ```bash
 cd /home/root
-wget "https://github.com/khanhas/zshelf/releases/download/v0.2.0/zshelf-reMarkable-0.3.0.zip"
+wget "https://github.com/khanhas/zshelf/releases/download/v0.3.0/zshelf-reMarkable-0.3.0.zip"
 unzip "zshelf-reMarkable-0.3.0.zip"
 ```
 
