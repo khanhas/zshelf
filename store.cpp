@@ -35,7 +35,7 @@ Store::Store() : rootView(rootObject()), context(rootContext())
     connect(worker, &Worker::socketClosed, this, [this]() {
         context->setContextProperty("titleVisible", QVariant(false));
         setProperty("isBusy", false);
-        if (initialInfo) {
+        if (initialInfo && infoThread != nullptr) {
             infoThread->work();
             initialInfo = false;
         }
