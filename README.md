@@ -63,7 +63,7 @@ LD_PRELOAD=/opt/lib/librm2fb_client.so.1.0.0 zshelf
 
 Downloaded EPUB and PDF books will be automatically available on your reMarkable app (if not, please restart the app or restart device). `zshelf` also makes a copy of the book to location configured in `additionalBookLocation`, so you can open it in other reader like [`KOReader`](https://github.com/koreader/koreader/wiki/Installation-on-Remarkable), which has ten fold better reading experience, highly recommended and also available on `toltec`.
 
-Also, install an app launcher so that you can open zshelf easier. Recommend `oxide`, `draft` or `remux`, all of them is available on `toltec`.
+Also, install an app launcher so that you can open zshelf easier. Recommend `oxide`, `draft` or `remux`, all of them are available on `toltec`.
 
 ## Development
 0. [Set up reMarkable toolchain](https://remarkablewiki.com/devel/qt_creator#toolchain), NodeJS and `npm`
