@@ -79,11 +79,8 @@ module.exports = function (args, socket) {
                     "visibleName": fileName
                 }));
 
-                if (fileExt == ".epub") {
-                    writeFileSync(xochitlFolder + uuid + ".content", JSON.stringify({ "fileType": "epub" }));
-                } else if (fileExt == ".pdf") {
-                    writeFileSync(xochitlFolder + uuid + ".content", JSON.stringify({ "fileType": "pdf" }));
-                }
+                // this is needed to get xochitl to handle these files in 2.6, the fileType should be epub for all ebooks, including pdfs
+                writeFileSync(xochitlFolder + uuid + ".content", JSON.stringify({ "fileType": "epub" }));
 
                 copyFileSync(tempFilePath, pathJoin(xochitlFolder, uuid + fileExt), constants.COPYFILE_FICLONE);
                 socket.write("COPIED XOCHITL\n");
