@@ -3,15 +3,11 @@ const { domain, fetchOptions } = require("./common");
 const fetch = require("node-fetch");
 
 module.exports = function (args, socket) {
-    const profile = fetch(domain + "/profile.php", fetchOptions).then(res => res.text()).then(html => {
-        const $ = cheerio.load(html);
-        const rows = $(".counter-value");
-        if (!rows.length) return;
+    const profile = fetch(domain + "/papi/user/dstats", fetchOptions).then(res => res.json()).then(json => {
+        if (!json) return;
+
         return ({
-            today_download: $(rows[0]).text().replace(/\s/g, ""),
-            total_download: $(rows[1]).text().replace(/\s/g, ""),
-            corrections: $(rows[2]).text().replace(/\s/g, ""),
-            donation: $(rows[3]).text().replace(/\s/g, "")
+            today_download: json.dailyDownloads + "/" + json.dailyDownloadsLimit
         });
     })
         .catch(err => {
@@ -45,7 +41,7 @@ module.exports = function (args, socket) {
 
     Promise.all([profile, history]).then(results => {
         if (!results || results.length < 2) return;
-        
+
         const final = results[0];
         final.today_list = results[1];
         socket.write(JSON.stringify(final));
