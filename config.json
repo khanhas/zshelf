@@ -1,7 +1,8 @@
 {
     "domain": "https://b-ok.global",
     "cookie": "",
-    "additionalBookLocation": "/home/root/Books/",
+    "additionalBookLocation": null,
+    "parentFolderUUID": null,
     "defaultQuery": {
         "exactMatch": "0",
         "fromYear": "2020",

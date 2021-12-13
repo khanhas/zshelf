@@ -14,3 +14,4 @@ module.exports.fetchOptions = {
 module.exports.domain = config.domain;
 module.exports.listURL = config.listURL;
 module.exports.additionalBookLocation = config.additionalBookLocation;
+module.exports.parentFolderUUID = config.parentFolderUUID;

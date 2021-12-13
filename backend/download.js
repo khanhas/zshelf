@@ -1,7 +1,7 @@
 const { writeFileSync, copyFileSync, existsSync, mkdirSync, createWriteStream, constants } = require("fs");
 const { join: pathJoin, extname, basename } = require("path");
 const { v4 } = require("uuid");
-const { domain, fetchOptions, additionalBookLocation } = require("./common");
+const { domain, fetchOptions, additionalBookLocation, parentFolderUUID} = require("./common");
 const fetch = require("node-fetch");
 
 module.exports = function (args, socket) {
@@ -71,13 +71,16 @@ module.exports = function (args, socket) {
                     "lastOpenedPage": 0,
                     "metadatamodified": false,
                     "modified": false,
-                    "parent": "",
+                    "parent": parentFolderUUID || "",
                     "pinned": false,
                     "synced": false,
                     "type": "DocumentType",
                     "version": 1,
                     "visibleName": fileName
                 }));
+
+                // this is needed to get xochitl to handle these files in 2.6, the fileType should be epub for all ebooks, including pdfs
+                writeFileSync(xochitlFolder + uuid + ".content", JSON.stringify({ "fileType": "epub" }));
 
                 copyFileSync(tempFilePath, pathJoin(xochitlFolder, uuid + fileExt), constants.COPYFILE_FICLONE);
                 socket.write("COPIED XOCHITL\n");
